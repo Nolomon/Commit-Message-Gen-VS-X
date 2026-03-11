@@ -1,0 +1,90 @@
+{
+  "name": "ai-commit-message-gen",
+  "displayName": "AI Commit Message Generator",
+  "description": "Generate conventional commit messages using AI models. Replaces the built-in commit message generator with a configurable, reliable alternative.",
+  "version": "0.1.0",
+  "publisher": "nour",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "SCM Providers",
+    "Other"
+  ],
+  "keywords": [
+    "git",
+    "commit",
+    "ai",
+    "claude",
+    "conventional-commits"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "extensionDependencies": [
+    "vscode.git"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "commitMessageGen.generate",
+        "title": "AI: Generate Commit Message",
+        "icon": {
+          "light": "resources/light/sparkle.svg",
+          "dark": "resources/dark/sparkle.svg"
+        }
+      },
+      {
+        "command": "commitMessageGen.setApiKey",
+        "title": "AI Commit: Set API Key"
+      }
+    ],
+    "menus": {
+      "scm/title": [
+        {
+          "command": "commitMessageGen.generate",
+          "group": "navigation",
+          "when": "scmProvider == git"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "AI Commit Message Generator",
+      "properties": {
+        "commitMessageGen.provider": {
+          "type": "string",
+          "enum": [
+            "anthropic"
+          ],
+          "enumDescriptions": [
+            "Anthropic (Claude models)"
+          ],
+          "default": "anthropic",
+          "description": "AI provider for generating commit messages."
+        },
+        "commitMessageGen.model": {
+          "type": "string",
+          "default": "claude-sonnet-4-6",
+          "description": "Model ID to use for commit message generation."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "node esbuild.js --production",
+    "watch": "node esbuild.js --watch",
+    "compile": "tsc -p ./",
+    "package": "npm run build && npx @vscode/vsce package --no-dependencies"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "esbuild": "^0.20.0",
+    "typescript": "^5.4.0"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0"
+  }
+}
