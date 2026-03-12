@@ -174,17 +174,28 @@ export function activate(context: vscode.ExtensionContext) {
             SECRET_KEY_PREFIX + providerId
           );
           if (!apiKey) {
-            const action = await vscode.window.showWarningMessage(
-              `No API key set for ${providerInfo.displayName}. Would you like to set one now?`,
-              { modal: true },
-              "Change Model",
-              "Set API Key"
+            const action = await vscode.window.showQuickPick(
+              [
+                {
+                  label: "$(key) Set API Key",
+                  id: "setKey",
+                  description: `Enter your ${providerInfo.displayName} key`,
+                },
+                {
+                  label: "$(arrow-swap) Change Model",
+                  id: "changeModel",
+                  description: "Switch to a different model",
+                },
+              ],
+              {
+                placeHolder: `No API key set for ${providerInfo.displayName}`,
+              }
             );
-            if (action === "Change Model") {
+            if (action?.id === "changeModel") {
               vscode.commands.executeCommand("commitMessageGen.setModel");
               return;
             }
-            if (action === "Set API Key") {
+            if (action?.id === "setKey") {
               const key = await vscode.window.showInputBox({
                 prompt: `Enter your ${providerInfo.displayName} API key`,
                 password: true,
