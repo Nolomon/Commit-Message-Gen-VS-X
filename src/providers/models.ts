@@ -7,6 +7,7 @@ export type ProviderId =
 
 export interface ProviderInfo {
   displayName: string;
+  baseUrl?: string;
 }
 
 export interface ModelInfo {
@@ -14,12 +15,14 @@ export interface ModelInfo {
   displayName: string;
 }
 
+export const DEFAULT_MODEL_ID = "claude-sonnet-4-6";
+
 export const PROVIDERS: Record<ProviderId, ProviderInfo> = {
   anthropic: { displayName: "Claude" },
-  openai: { displayName: "GPT" },
+  openai: { displayName: "GPT", baseUrl: "https://api.openai.com/v1" },
   google: { displayName: "Gemini" },
-  deepseek: { displayName: "DeepSeek" },
-  mistral: { displayName: "Mistral" },
+  deepseek: { displayName: "DeepSeek", baseUrl: "https://api.deepseek.com" },
+  mistral: { displayName: "Mistral", baseUrl: "https://api.mistral.ai/v1" },
 };
 
 export const MODELS: Record<string, ModelInfo> = {

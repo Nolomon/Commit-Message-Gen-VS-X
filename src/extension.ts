@@ -6,6 +6,7 @@ import {
   getAllProviderIds,
   PROVIDERS,
   MODELS,
+  DEFAULT_MODEL_ID,
 } from "./providers/models";
 
 const SECRET_KEY_PREFIX = "commitMessageGen.apiKey.";
@@ -104,7 +105,7 @@ export function activate(context: vscode.ExtensionContext) {
           vscode.workspace.getConfiguration("commitMessageGen");
         const currentModelId = config.get<string>(
           "model",
-          "claude-sonnet-4-6"
+          DEFAULT_MODEL_ID
         );
 
         const items: (vscode.QuickPickItem & { modelId: string })[] =
@@ -156,7 +157,7 @@ export function activate(context: vscode.ExtensionContext) {
           // Read model from configuration
           const config =
             vscode.workspace.getConfiguration("commitMessageGen");
-          const modelId = config.get<string>("model", "claude-sonnet-4-6");
+          const modelId = config.get<string>("model", DEFAULT_MODEL_ID);
 
           // Resolve provider from model
           const info = getProviderForModel(modelId);

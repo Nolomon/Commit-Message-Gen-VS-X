@@ -18,29 +18,22 @@ export function createProvider(
   switch (info.providerId) {
     case "anthropic":
       return new ClaudeProvider(apiKey, modelId);
-    case "openai":
-      return new OpenAICompatibleProvider(
-        apiKey,
-        modelId,
-        "https://api.openai.com/v1",
-        PROVIDERS.openai.displayName
-      );
+
     case "google":
       return new GeminiProvider(apiKey, modelId);
+
+    case "openai":
     case "deepseek":
+    case "mistral": {
+      const providerInfo = PROVIDERS[info.providerId];
       return new OpenAICompatibleProvider(
         apiKey,
         modelId,
-        "https://api.deepseek.com",
-        PROVIDERS.deepseek.displayName
+        providerInfo.baseUrl!,
+        providerInfo.displayName
       );
-    case "mistral":
-      return new OpenAICompatibleProvider(
-        apiKey,
-        modelId,
-        "https://api.mistral.ai/v1",
-        PROVIDERS.mistral.displayName
-      );
+    }
+
     default: {
       const _exhaustive: never = info.providerId;
       throw new Error(`No provider implementation for "${_exhaustive}".`);
