@@ -3,7 +3,7 @@
   "displayName": "AI Commit Message Generator",
   "description": "Generate conventional commit messages using AI models. Replaces the built-in commit message generator with a configurable, reliable alternative.",
   "version": "0.1.0",
-  "publisher": "nour",
+  "publisher": "Nolomon",
   "license": "MIT",
   "engines": {
     "vscode": "^1.85.0"
