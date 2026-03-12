@@ -48,6 +48,10 @@
       {
         "command": "commitMessageGen.clearApiKey",
         "title": "AI Commit: Clear API Key"
+      },
+      {
+        "command": "commitMessageGen.setModel",
+        "title": "AI Commit: Set Model"
       }
     ],
     "menus": {

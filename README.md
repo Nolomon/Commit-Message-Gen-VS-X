@@ -28,13 +28,13 @@ By default, the generate button only appears when hovering over the Source Contr
 | **DeepSeek** | V3, R1 |
 | **Mistral** | Large, Codestral |
 
-## API Key Management
+## Commands
 
-Each provider requires its own API key, stored securely via VS Code's SecretStorage.
+- **Set Model**: Command Palette → `AI Commit: Set Model`
+- **Set / Update API Key**: Command Palette → `AI Commit: Set API Key`
+- **Clear API Key**: Command Palette → `AI Commit: Clear API Key`
 
-- **Set / Update**: Command Palette → `AI Commit: Set API Key`
-- **Clear**: Command Palette → `AI Commit: Clear API Key`
-- **On-demand**: If no key is set for the selected model's provider, a modal dialog will prompt you to enter one when generating.
+Each provider requires its own API key, stored securely via VS Code's SecretStorage. If no key is set for the selected model's provider, you'll be prompted to enter one when generating.
 
 ## Commit Format
 

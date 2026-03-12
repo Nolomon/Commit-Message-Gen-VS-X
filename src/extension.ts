@@ -5,6 +5,7 @@ import {
   getProviderForModel,
   getAllProviderIds,
   PROVIDERS,
+  MODELS,
 } from "./providers/models";
 
 const SECRET_KEY_PREFIX = "commitMessageGen.apiKey.";
@@ -89,6 +90,46 @@ export function activate(context: vscode.ExtensionContext) {
         await context.secrets.delete(SECRET_KEY_PREFIX + picked.providerId);
         vscode.window.showInformationMessage(
           `API key for ${picked.label} cleared.`
+        );
+      }
+    )
+  );
+
+  // Command: Set Model
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "commitMessageGen.setModel",
+      async () => {
+        const config =
+          vscode.workspace.getConfiguration("commitMessageGen");
+        const currentModelId = config.get<string>(
+          "model",
+          "claude-sonnet-4-6"
+        );
+
+        const items: (vscode.QuickPickItem & { modelId: string })[] =
+          Object.entries(MODELS).map(([id, model]) => ({
+            label: model.displayName,
+            description:
+              PROVIDERS[model.provider].displayName +
+              (id === currentModelId ? " $(check)" : ""),
+            modelId: id,
+          }));
+
+        const picked = await vscode.window.showQuickPick(items, {
+          placeHolder: "Select a model for commit message generation",
+        });
+        if (!picked || picked.modelId === currentModelId) {
+          return;
+        }
+
+        await config.update(
+          "model",
+          picked.modelId,
+          vscode.ConfigurationTarget.Global
+        );
+        vscode.window.showInformationMessage(
+          `Model set to ${picked.label}.`
         );
       }
     )
