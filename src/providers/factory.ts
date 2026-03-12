@@ -1,28 +1,49 @@
 import { CommitMessageProvider } from "./types";
 import { ClaudeProvider } from "./claude";
-
-const PROVIDERS: Record<
-  string,
-  new (apiKey: string, model: string) => CommitMessageProvider
-> = {
-  anthropic: ClaudeProvider,
-};
+import { OpenAICompatibleProvider } from "./openai-compatible";
+import { GeminiProvider } from "./gemini";
+import { getProviderForModel, PROVIDERS } from "./models";
 
 export function createProvider(
-  providerName: string,
-  model: string,
+  modelId: string,
   apiKey: string
 ): CommitMessageProvider {
-  const Provider = PROVIDERS[providerName];
-  if (!Provider) {
-    const supported = Object.keys(PROVIDERS).join(", ");
+  const info = getProviderForModel(modelId);
+  if (!info) {
     throw new Error(
-      `Unknown provider "${providerName}". Supported providers: ${supported}`
+      `Unknown model "${modelId}". Check your commitMessageGen.model setting.`
     );
   }
-  return new Provider(apiKey, model);
-}
 
-export function getSupportedProviders(): string[] {
-  return Object.keys(PROVIDERS);
+  switch (info.providerId) {
+    case "anthropic":
+      return new ClaudeProvider(apiKey, modelId);
+    case "openai":
+      return new OpenAICompatibleProvider(
+        apiKey,
+        modelId,
+        "https://api.openai.com/v1",
+        PROVIDERS.openai.displayName
+      );
+    case "google":
+      return new GeminiProvider(apiKey, modelId);
+    case "deepseek":
+      return new OpenAICompatibleProvider(
+        apiKey,
+        modelId,
+        "https://api.deepseek.com",
+        PROVIDERS.deepseek.displayName
+      );
+    case "mistral":
+      return new OpenAICompatibleProvider(
+        apiKey,
+        modelId,
+        "https://api.mistral.ai/v1",
+        PROVIDERS.mistral.displayName
+      );
+    default: {
+      const _exhaustive: never = info.providerId;
+      throw new Error(`No provider implementation for "${_exhaustive}".`);
+    }
+  }
 }

@@ -1,31 +1,95 @@
 import * as vscode from "vscode";
 import { getGitAPI, getActiveRepository, getStagedDiff } from "./git";
 import { createProvider } from "./providers/factory";
+import {
+  getProviderForModel,
+  getAllProviderIds,
+  PROVIDERS,
+} from "./providers/models";
 
 const SECRET_KEY_PREFIX = "commitMessageGen.apiKey.";
 
 export function activate(context: vscode.ExtensionContext) {
-  // Command: Set API Key
+  // Command: Set / Update API Key
   context.subscriptions.push(
     vscode.commands.registerCommand(
       "commitMessageGen.setApiKey",
       async () => {
-        const config = vscode.workspace.getConfiguration("commitMessageGen");
-        const provider = config.get<string>("provider", "anthropic");
+        const providerIds = getAllProviderIds();
+
+        const items: (vscode.QuickPickItem & { providerId: string })[] = [];
+        for (const id of providerIds) {
+          const hasKey = await context.secrets.get(SECRET_KEY_PREFIX + id);
+          items.push({
+            label: PROVIDERS[id].displayName,
+            description: hasKey ? "$(check) API key set" : "$(circle-slash) No API key",
+            providerId: id,
+          });
+        }
+
+        const picked = await vscode.window.showQuickPick(items, {
+          placeHolder: "Select a provider to set the API key for",
+        });
+        if (!picked) {
+          return;
+        }
 
         const key = await vscode.window.showInputBox({
-          prompt: `Enter your API key for ${provider}`,
+          prompt: `Enter your API key for ${picked.label}`,
           password: true,
           ignoreFocusOut: true,
-          placeHolder: "sk-...",
+          placeHolder: "Enter API key...",
         });
 
         if (key) {
-          await context.secrets.store(SECRET_KEY_PREFIX + provider, key);
+          await context.secrets.store(
+            SECRET_KEY_PREFIX + picked.providerId,
+            key
+          );
           vscode.window.showInformationMessage(
-            `API key for ${provider} saved securely.`
+            `API key for ${picked.label} saved securely.`
           );
         }
+      }
+    )
+  );
+
+  // Command: Clear API Key
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "commitMessageGen.clearApiKey",
+      async () => {
+        const providerIds = getAllProviderIds();
+
+        const items: (vscode.QuickPickItem & { providerId: string })[] = [];
+        for (const id of providerIds) {
+          const hasKey = await context.secrets.get(SECRET_KEY_PREFIX + id);
+          if (hasKey) {
+            items.push({
+              label: PROVIDERS[id].displayName,
+              providerId: id,
+            });
+          }
+        }
+
+        if (items.length === 0) {
+          vscode.window.showInformationMessage(
+            "No API keys are currently stored."
+          );
+          return;
+        }
+
+        const picked = await vscode.window.showQuickPick(items, {
+          placeHolder: "Select a provider to clear the API key for",
+        });
+        if (!picked) {
+          return;
+        }
+
+        await context.secrets.delete(SECRET_KEY_PREFIX + picked.providerId);
+        vscode.window.showInformationMessage(
+          `API key for ${picked.label} cleared.`
+        );
       }
     )
   );
@@ -48,29 +112,46 @@ export function activate(context: vscode.ExtensionContext) {
             return;
           }
 
-          // Read configuration
+          // Read model from configuration
           const config =
             vscode.workspace.getConfiguration("commitMessageGen");
-          const providerName = config.get<string>("provider", "anthropic");
-          const model = config.get<string>("model", "claude-sonnet-4-6");
+          const modelId = config.get<string>("model", "claude-sonnet-4-6");
+
+          // Resolve provider from model
+          const info = getProviderForModel(modelId);
+          if (!info) {
+            vscode.window.showErrorMessage(
+              `Unknown model "${modelId}". Check your commitMessageGen.model setting.`
+            );
+            return;
+          }
+
+          const { providerId, provider: providerInfo } = info;
 
           // Get API key from secret storage
           let apiKey = await context.secrets.get(
-            SECRET_KEY_PREFIX + providerName
+            SECRET_KEY_PREFIX + providerId
           );
           if (!apiKey) {
-            const setNow = await vscode.window.showWarningMessage(
-              `No API key found for ${providerName}. Would you like to set one now?`,
-              "Set API Key",
-              "Cancel"
+            const action = await vscode.window.showWarningMessage(
+              `No API key set for ${providerInfo.displayName}. Would you like to set one now?`,
+              { modal: true },
+              "Set API Key"
             );
-            if (setNow === "Set API Key") {
-              await vscode.commands.executeCommand(
-                "commitMessageGen.setApiKey"
-              );
-              apiKey = await context.secrets.get(
-                SECRET_KEY_PREFIX + providerName
-              );
+            if (action === "Set API Key") {
+              const key = await vscode.window.showInputBox({
+                prompt: `Enter your ${providerInfo.displayName} API key`,
+                password: true,
+                ignoreFocusOut: true,
+                placeHolder: "Enter API key...",
+              });
+              if (key) {
+                await context.secrets.store(
+                  SECRET_KEY_PREFIX + providerId,
+                  key
+                );
+                apiKey = key;
+              }
             }
             if (!apiKey) {
               return;
@@ -78,7 +159,7 @@ export function activate(context: vscode.ExtensionContext) {
           }
 
           // Generate with progress
-          const provider = createProvider(providerName, model, apiKey);
+          const provider = createProvider(modelId, apiKey);
 
           try {
             const message = await vscode.window.withProgress(
