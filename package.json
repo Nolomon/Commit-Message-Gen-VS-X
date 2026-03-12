@@ -5,6 +5,10 @@
   "version": "0.1.0",
   "publisher": "Nolomon",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Nolomon/Commit-Message-Gen-VS-X.git"
+  },
   "engines": {
     "vscode": "^1.85.0"
   },
