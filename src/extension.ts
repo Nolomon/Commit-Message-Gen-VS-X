@@ -177,8 +177,13 @@ export function activate(context: vscode.ExtensionContext) {
             const action = await vscode.window.showWarningMessage(
               `No API key set for ${providerInfo.displayName}. Would you like to set one now?`,
               { modal: true },
-              "Set API Key"
+              "Set API Key",
+              "Change Model"
             );
+            if (action === "Change Model") {
+              vscode.commands.executeCommand("commitMessageGen.setModel");
+              return;
+            }
             if (action === "Set API Key") {
               const key = await vscode.window.showInputBox({
                 prompt: `Enter your ${providerInfo.displayName} API key`,
