@@ -5,7 +5,7 @@ Generate conventional commit messages using AI models. A reliable alternative to
 ## Usage
 
 1. Stage your changes in the Source Control view
-2. Click the sparkle icon in the Source Control title bar
+2. Click the feather icon in the Source Control title bar
 3. A commit message will be generated and placed in the input box
 
 On first use, you'll be prompted to enter your API key for the selected model's provider.
@@ -18,16 +18,10 @@ By default, the generate button only appears when hovering over the Source Contr
 "workbench.view.alwaysShowHeaderActions": true
 ```
 
-## Configuration
-
-| Setting | Default | Description |
-|---------|---------|-------------|
-| `commitMessageGen.model` | `claude-sonnet-4-6` | AI model to use. The provider is determined automatically. |
-
 ## Supported Models
 
 | Provider | Models |
-|----------|--------|
+| -------- | ------ |
 | **Claude** (Anthropic) | Sonnet 4.6, Opus 4.6, Haiku 4.5 |
 | **GPT** (OpenAI) | GPT-4o, GPT-4o Mini, o3-mini |
 | **Gemini** (Google) | 2.5 Pro, 2.0 Flash |
@@ -46,7 +40,7 @@ Each provider requires its own API key, stored securely via VS Code's SecretStor
 
 Messages follow the [Conventional Commits](https://www.conventionalcommits.org/) standard:
 
-```
+```text
 <type>(<scope>): <description>
 
 [optional body]
