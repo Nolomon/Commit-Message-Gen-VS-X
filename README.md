@@ -5,10 +5,10 @@ Generate conventional commit messages using AI models. A reliable alternative to
 ## Usage
 
 1. Stage your changes in the Source Control view
-2. Click the feather icon in the Source Control title bar
+2. Click the sparkle icon in the Source Control title bar
 3. A commit message will be generated and placed in the input box
 
-On first use, you'll be prompted to enter your API key. You can also set it anytime via the Command Palette: **AI Commit: Set API Key**.
+On first use, you'll be prompted to enter your API key for the selected model's provider.
 
 ## Tip: Pin the button
 
@@ -22,14 +22,25 @@ By default, the generate button only appears when hovering over the Source Contr
 
 | Setting | Default | Description |
 |---------|---------|-------------|
-| `commitMessageGen.provider` | `anthropic` | AI provider to use |
-| `commitMessageGen.model` | `claude-sonnet-4-6` | Model ID for generation |
+| `commitMessageGen.model` | `claude-sonnet-4-6` | AI model to use. The provider is determined automatically. |
 
-## Supported Providers
+## Supported Models
 
-- **Anthropic** — Claude Sonnet, Opus, Haiku (any Claude model ID)
+| Provider | Models |
+|----------|--------|
+| **Claude** (Anthropic) | Sonnet 4.6, Opus 4.6, Haiku 4.5 |
+| **GPT** (OpenAI) | GPT-4o, GPT-4o Mini, o3-mini |
+| **Gemini** (Google) | 2.5 Pro, 2.0 Flash |
+| **DeepSeek** | V3, R1 |
+| **Mistral** | Large, Codestral |
 
-More providers coming soon.
+## API Key Management
+
+Each provider requires its own API key, stored securely via VS Code's SecretStorage.
+
+- **Set / Update**: Command Palette → `AI Commit: Set API Key`
+- **Clear**: Command Palette → `AI Commit: Clear API Key`
+- **On-demand**: If no key is set for the selected model's provider, a modal dialog will prompt you to enter one when generating.
 
 ## Commit Format
 
