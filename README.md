@@ -1,4 +1,4 @@
-# AI Commit Message Generator
+# AI Commit Message Gen
 
 Generate conventional commit messages using AI models. A reliable alternative to the built-in commit message generator.
 

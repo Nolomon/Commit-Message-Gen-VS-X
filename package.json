@@ -1,6 +1,6 @@
 {
   "name": "ai-commit-message-gen",
-  "displayName": "AI Commit Message Generator",
+  "displayName": "AI Commit Message Gen",
   "description": "Generate conventional commit messages using AI models. Replaces the built-in commit message generator with a configurable, reliable alternative.",
   "version": "0.1.0",
   "publisher": "Nolomon",
@@ -68,7 +68,7 @@
       ]
     },
     "configuration": {
-      "title": "AI Commit Message Generator",
+      "title": "AI Commit Message Gen",
       "properties": {
         "commitMessageGen.model": {
           "type": "string",
