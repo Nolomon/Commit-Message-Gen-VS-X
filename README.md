@@ -1,24 +1,30 @@
 # AI Commit Message Gen
 
-Generate conventional commit messages using AI models. A reliable alternative to the built-in commit message generator.
+AI Commit Message Gen is a VS Code extension for generating Git commit messages with AI directly inside the Source Control view. It creates clean [Conventional Commits](https://www.conventionalcommits.org/) and works as a configurable alternative to the built-in commit message generator.
 
-## Usage
+If you want an AI commit message generator for VS Code that supports multiple providers and models, this extension is built for that workflow.
 
-1. Stage your changes in the Source Control view
-2. Click the feather icon in the Source Control title bar
-3. A commit message will be generated and placed in the input box
+## AI Commit Message Generator for VS Code
 
-On first use, you'll be prompted to enter your API key for the selected model's provider.
+Generate commit messages in VS Code without leaving your editor:
 
-## Tip: Pin the button
+1. Stage your changes in the Source Control view.
+2. Click the feather button in the Source Control title bar.
+3. The extension writes an AI-generated commit message into the commit input box.
 
-By default, the generate button only appears when hovering over the Source Control title bar. To make it always visible, add this to your VS Code settings:
+On first use, the extension prompts you for an API key for the currently selected model provider.
 
-```json
-"workbench.view.alwaysShowHeaderActions": true
-```
+## Why Use This Extension
 
-## Supported Models
+- Generate Git commit messages with AI inside VS Code.
+- Produce consistent Conventional Commit messages.
+- Choose from multiple AI providers and models.
+- Replace the default VS Code commit message generator with a more effective option.
+- Keep API keys secure with VS Code SecretStorage.
+
+## Supported AI Models
+
+Use the commit message generator with models from Anthropic, OpenAI, Google, DeepSeek, and Mistral.
 
 | Provider | Models |
 | -------- | ------ |
@@ -28,17 +34,17 @@ By default, the generate button only appears when hovering over the Source Contr
 | **DeepSeek** | V3, R1 |
 | **Mistral** | Large, Codestral |
 
-## Commands
+## VS Code Commands
 
-- **Set Model**: Command Palette → `AI Commit: Set Model`
-- **Set / Update API Key**: Command Palette → `AI Commit: Set API Key`
-- **Clear API Key**: Command Palette → `AI Commit: Clear API Key`
+- `AI Commit: Set Model`
+- `AI Commit: Set API Key`
+- `AI Commit: Clear API Key`
 
-Each provider requires its own API key, stored securely via VS Code's SecretStorage. If no key is set for the selected model's provider, you'll be prompted to enter one when generating.
+Each provider uses its own API key. Keys are stored securely using VS Code SecretStorage. If no key is set for the selected provider, you will be prompted when you generate a commit message.
 
-## Commit Format
+## Conventional Commit Format
 
-Messages follow the [Conventional Commits](https://www.conventionalcommits.org/) standard:
+Generated messages follow the Conventional Commits format:
 
 ```text
 <type>(<scope>): <description>
@@ -46,4 +52,18 @@ Messages follow the [Conventional Commits](https://www.conventionalcommits.org/)
 [optional body]
 ```
 
-Types: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`
+Common commit types: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`
+
+## Tip: Keep the Generate Button Visible
+
+By default, the Source Control title bar button appears on hover. To keep it pinned in VS Code, add this setting:
+
+```json
+"workbench.view.alwaysShowHeaderActions": true
+```
+
+## ⭐ If It Helps You
+
+If this extension saves you time, consider leaving a rating on the VS Code Marketplace.
+
+It helps other developers discover it.
