@@ -2,7 +2,7 @@
   "name": "ai-commit-message-gen",
   "displayName": "AI Commit Message Gen",
   "description": "Generate AI Git commit messages in VS Code using Conventional Commits. Supports OpenAI, Claude, Gemini, DeepSeek, and Mistral.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "Nolomon",
   "license": "MIT",
   "repository": {
