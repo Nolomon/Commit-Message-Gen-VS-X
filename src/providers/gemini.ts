@@ -1,6 +1,7 @@
 import { SYSTEM_PROMPT } from "../core/prompt";
 import { CommitMessageProvider } from "./types";
 import { stripMarkdownFences, buildUserMessage } from "./shared";
+import { registerProvider } from "./registry";
 
 export class GeminiProvider implements CommitMessageProvider {
   readonly name = "Google Gemini";
@@ -49,3 +50,5 @@ export class GeminiProvider implements CommitMessageProvider {
     // No persistent resources to clean up
   }
 }
+
+registerProvider("google", (apiKey, modelId) => new GeminiProvider(apiKey, modelId));

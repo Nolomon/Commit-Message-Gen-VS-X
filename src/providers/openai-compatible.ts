@@ -1,6 +1,8 @@
 import { SYSTEM_PROMPT } from "../core/prompt";
 import { CommitMessageProvider } from "./types";
 import { stripMarkdownFences, buildUserMessage, MAX_TOKENS } from "./shared";
+import { registerProvider } from "./registry";
+import { PROVIDERS } from "./models";
 
 export class OpenAICompatibleProvider implements CommitMessageProvider {
   readonly name: string;
@@ -58,4 +60,11 @@ export class OpenAICompatibleProvider implements CommitMessageProvider {
   dispose(): void {
     // No persistent resources to clean up
   }
+}
+
+for (const providerId of ["openai", "deepseek", "mistral"] as const) {
+  const info = PROVIDERS[providerId];
+  registerProvider(providerId, (apiKey, modelId) =>
+    new OpenAICompatibleProvider(apiKey, modelId, info.baseUrl!, info.displayName)
+  );
 }

@@ -2,6 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { SYSTEM_PROMPT } from "../core/prompt";
 import { CommitMessageProvider } from "./types";
 import { stripMarkdownFences, buildUserMessage, MAX_TOKENS } from "./shared";
+import { registerProvider } from "./registry";
 
 export class ClaudeProvider implements CommitMessageProvider {
   readonly name = "Anthropic Claude";
@@ -35,3 +36,5 @@ export class ClaudeProvider implements CommitMessageProvider {
     // No persistent resources to clean up
   }
 }
+
+registerProvider("anthropic", (apiKey, modelId) => new ClaudeProvider(apiKey, modelId));
