@@ -1,16 +1,16 @@
 import * as vscode from "vscode";
-import { SECRET_KEY_PREFIX } from "../core/ports";
+import { ISecretStore, SECRET_KEY_PREFIX } from "../core/ports";
 import { getAllProviderIds, PROVIDERS } from "../providers/models";
 
 export function clearApiKeyHandler(
-  secrets: vscode.SecretStorage
+  secretStore: ISecretStore
 ): () => Promise<void> {
   return async () => {
     const providerIds = getAllProviderIds();
 
     const items: (vscode.QuickPickItem & { providerId: string })[] = [];
     for (const id of providerIds) {
-      const hasKey = await secrets.get(SECRET_KEY_PREFIX + id);
+      const hasKey = await secretStore.get(SECRET_KEY_PREFIX + id);
       if (hasKey) {
         items.push({
           label: PROVIDERS[id].displayName,
@@ -33,7 +33,7 @@ export function clearApiKeyHandler(
       return;
     }
 
-    await secrets.delete(SECRET_KEY_PREFIX + picked.providerId);
+    await secretStore.delete(SECRET_KEY_PREFIX + picked.providerId);
     vscode.window.showInformationMessage(
       `API key for ${picked.label} cleared.`
     );

@@ -1,12 +1,12 @@
 import * as vscode from "vscode";
-import { IConfigService, SECRET_KEY_PREFIX } from "../core/ports";
+import { IConfigService, IProviderFactory, ISecretStore, SECRET_KEY_PREFIX } from "../core/ports";
 import { getGitAPI, getActiveRepository, getStagedDiff } from "../git";
-import { createProvider } from "../providers/factory";
 import { getProviderForModel } from "../providers/models";
 
 export function generateHandler(
-  secrets: vscode.SecretStorage,
-  configService: IConfigService
+  secretStore: ISecretStore,
+  configService: IConfigService,
+  providerFactory: IProviderFactory
 ): () => Promise<void> {
   return async () => {
     try {
@@ -33,7 +33,7 @@ export function generateHandler(
 
       const { providerId, provider: providerInfo } = info;
 
-      let apiKey = await secrets.get(SECRET_KEY_PREFIX + providerId);
+      let apiKey = await secretStore.get(SECRET_KEY_PREFIX + providerId);
       if (!apiKey) {
         const action = await vscode.window.showQuickPick(
           [
@@ -64,7 +64,7 @@ export function generateHandler(
             placeHolder: "Enter API key...",
           });
           if (key) {
-            await secrets.store(SECRET_KEY_PREFIX + providerId, key);
+            await secretStore.store(SECRET_KEY_PREFIX + providerId, key);
             apiKey = key;
           }
         }
@@ -73,7 +73,7 @@ export function generateHandler(
         }
       }
 
-      const provider = createProvider(modelId, apiKey);
+      const provider = providerFactory.create(modelId, apiKey);
 
       try {
         const message = await vscode.window.withProgress(
