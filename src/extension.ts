@@ -1,5 +1,7 @@
 import * as vscode from "vscode";
 import { ConfigService } from "./infrastructure/config-service";
+import { SecretStore } from "./infrastructure/secret-store";
+import { ProviderFactory } from "./infrastructure/provider-factory";
 import { setApiKeyHandler } from "./commands/set-api-key";
 import { clearApiKeyHandler } from "./commands/clear-api-key";
 import { setModelHandler } from "./commands/set-model";
@@ -7,13 +9,14 @@ import { generateHandler } from "./commands/generate";
 
 export function activate(context: vscode.ExtensionContext) {
   const configService = new ConfigService();
-  const secrets = context.secrets;
+  const secretStore = new SecretStore(context.secrets);
+  const providerFactory = new ProviderFactory();
 
   const commands: [string, () => Promise<void>][] = [
-    ["commitMessageGen.setApiKey", setApiKeyHandler(secrets)],
-    ["commitMessageGen.clearApiKey", clearApiKeyHandler(secrets)],
+    ["commitMessageGen.setApiKey", setApiKeyHandler(secretStore)],
+    ["commitMessageGen.clearApiKey", clearApiKeyHandler(secretStore)],
     ["commitMessageGen.setModel", setModelHandler(configService)],
-    ["commitMessageGen.generate", generateHandler(secrets, configService)],
+    ["commitMessageGen.generate", generateHandler(secretStore, configService, providerFactory)],
   ];
 
   for (const [id, handler] of commands) {
