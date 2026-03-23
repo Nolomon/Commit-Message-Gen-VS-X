@@ -13,6 +13,7 @@ export interface ISecretStore {
 
 export interface IConfigService {
   getModelId(): string;
+  setModelId(modelId: string): Promise<void>;
 }
 
 export interface IProviderFactory {

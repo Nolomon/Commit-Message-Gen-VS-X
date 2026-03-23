@@ -6,12 +6,13 @@ import {
   getAllProviderIds,
   PROVIDERS,
   MODELS,
-  DEFAULT_MODEL_ID,
 } from "./providers/models";
+import { ConfigService } from "./infrastructure/config-service";
 
 const SECRET_KEY_PREFIX = "commitMessageGen.apiKey.";
 
 export function activate(context: vscode.ExtensionContext) {
+  const configService = new ConfigService();
   // Command: Set / Update API Key
   context.subscriptions.push(
     vscode.commands.registerCommand(
@@ -101,12 +102,7 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand(
       "commitMessageGen.setModel",
       async () => {
-        const config =
-          vscode.workspace.getConfiguration("commitMessageGen");
-        const currentModelId = config.get<string>(
-          "model",
-          DEFAULT_MODEL_ID
-        );
+        const currentModelId = configService.getModelId();
 
         const items: (vscode.QuickPickItem & { modelId: string })[] =
           Object.entries(MODELS).map(([id, model]) => ({
@@ -124,11 +120,7 @@ export function activate(context: vscode.ExtensionContext) {
           return;
         }
 
-        await config.update(
-          "model",
-          picked.modelId,
-          vscode.ConfigurationTarget.Global
-        );
+        await configService.setModelId(picked.modelId);
         vscode.window.showInformationMessage(
           `Model set to ${picked.label}.`
         );
@@ -155,9 +147,7 @@ export function activate(context: vscode.ExtensionContext) {
           }
 
           // Read model from configuration
-          const config =
-            vscode.workspace.getConfiguration("commitMessageGen");
-          const modelId = config.get<string>("model", DEFAULT_MODEL_ID);
+          const modelId = configService.getModelId();
 
           // Resolve provider from model
           const info = getProviderForModel(modelId);
