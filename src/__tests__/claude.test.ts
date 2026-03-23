@@ -11,7 +11,7 @@ vi.mock("@anthropic-ai/sdk", () => {
 
 import Anthropic from "@anthropic-ai/sdk";
 import { ClaudeProvider } from "../providers/claude";
-import { SYSTEM_PROMPT } from "../prompt";
+import { SYSTEM_PROMPT } from "../core/prompt";
 import { MAX_TOKENS, MAX_DIFF_CHARS } from "../providers/shared";
 
 describe("ClaudeProvider", () => {

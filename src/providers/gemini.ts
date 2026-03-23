@@ -1,4 +1,4 @@
-import { SYSTEM_PROMPT } from "../prompt";
+import { SYSTEM_PROMPT } from "../core/prompt";
 import { CommitMessageProvider } from "./types";
 import { stripMarkdownFences, buildUserMessage } from "./shared";
 
