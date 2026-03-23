@@ -23,9 +23,14 @@ function createMockDeps(overrides?: {
     dispose: vi.fn(),
   };
 
+  const mockRepo = {
+    rootPath: "/repo",
+    setCommitMessage: vi.fn(),
+  };
+
   return {
     gitService: {
-      getRepositoryPath: vi.fn().mockResolvedValue("/repo"),
+      getActiveRepository: vi.fn().mockResolvedValue(mockRepo),
       getStagedDiff: vi.fn().mockResolvedValue("diff --git a/file.ts\n+added"),
       ...overrides?.gitService,
     } satisfies IGitService,
@@ -48,6 +53,7 @@ function createMockDeps(overrides?: {
       ...overrides?.apiKeyResolver,
     } satisfies ApiKeyResolver,
     mockProvider,
+    mockRepo,
   };
 }
 
@@ -58,7 +64,7 @@ describe("generateCommitMessage", () => {
     const result = await generateCommitMessage(deps);
 
     expect(result.message).toBe("feat(core): add new feature");
-    expect(deps.gitService.getRepositoryPath).toHaveBeenCalled();
+    expect(deps.gitService.getActiveRepository).toHaveBeenCalled();
     expect(deps.gitService.getStagedDiff).toHaveBeenCalledWith("/repo");
     expect(deps.providerFactory.create).toHaveBeenCalledWith(
       "claude-sonnet-4-6",
@@ -70,7 +76,7 @@ describe("generateCommitMessage", () => {
   it("should throw NoDiffError when no staged changes", async () => {
     const deps = createMockDeps({
       gitService: {
-        getRepositoryPath: vi.fn().mockResolvedValue("/repo"),
+        getActiveRepository: vi.fn().mockResolvedValue({ rootPath: "/repo", setCommitMessage: vi.fn() }),
         getStagedDiff: vi.fn().mockResolvedValue("   "),
       },
     });

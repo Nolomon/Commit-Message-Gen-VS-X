@@ -19,8 +19,8 @@ export async function generateCommitMessage(deps: {
 }): Promise<GenerateResult> {
   const { gitService, configService, secretStore, providerFactory, apiKeyResolver } = deps;
 
-  const repoPath = await gitService.getRepositoryPath();
-  const diff = await gitService.getStagedDiff(repoPath);
+  const repo = await gitService.getActiveRepository();
+  const diff = await gitService.getStagedDiff(repo.rootPath);
 
   if (!diff.trim()) {
     throw new NoDiffError("No staged changes found. Stage some changes first.");

@@ -2,8 +2,13 @@ import { CommitMessageProvider } from "../providers/types";
 
 export const SECRET_KEY_PREFIX = "commitMessageGen.apiKey.";
 
+export interface IGitRepository {
+  readonly rootPath: string;
+  setCommitMessage(message: string): void;
+}
+
 export interface IGitService {
-  getRepositoryPath(): Promise<string>;
+  getActiveRepository(): Promise<IGitRepository>;
   getStagedDiff(repoRoot: string): Promise<string>;
 }
 
