@@ -1,9 +1,12 @@
 import { CommitMessageProvider } from "./types";
-import { ClaudeProvider } from "./claude";
-import { OpenAICompatibleProvider } from "./openai-compatible";
-import { GeminiProvider } from "./gemini";
-import { getProviderForModel, PROVIDERS } from "./models";
+import { getProviderForModel } from "./models";
+import { getProviderCreator } from "./registry";
 import { UnknownModelError } from "../core/errors";
+
+// Import provider modules to trigger self-registration
+import "./claude";
+import "./gemini";
+import "./openai-compatible";
 
 export function createProvider(
   modelId: string,
@@ -16,28 +19,10 @@ export function createProvider(
     );
   }
 
-  switch (info.providerId) {
-    case "anthropic":
-      return new ClaudeProvider(apiKey, modelId);
-
-    case "google":
-      return new GeminiProvider(apiKey, modelId);
-
-    case "openai":
-    case "deepseek":
-    case "mistral": {
-      const providerInfo = PROVIDERS[info.providerId];
-      return new OpenAICompatibleProvider(
-        apiKey,
-        modelId,
-        providerInfo.baseUrl!,
-        providerInfo.displayName
-      );
-    }
-
-    default: {
-      const _exhaustive: never = info.providerId;
-      throw new Error(`No provider implementation for "${_exhaustive}".`);
-    }
+  const creator = getProviderCreator(info.providerId);
+  if (!creator) {
+    throw new Error(`No provider registered for "${info.providerId}".`);
   }
+
+  return creator(apiKey, modelId);
 }
