@@ -1,19 +1,18 @@
 import * as vscode from "vscode";
-import { IConfigService, IProviderFactory, ISecretStore, SECRET_KEY_PREFIX } from "../core/ports";
-import { getGitAPI, getActiveRepository, getStagedDiff } from "../git";
+import { IConfigService, IGitService, IProviderFactory, ISecretStore, SECRET_KEY_PREFIX } from "../core/ports";
 import { getProviderForModel } from "../providers/models";
 
 export function generateHandler(
+  gitService: IGitService,
   secretStore: ISecretStore,
   configService: IConfigService,
   providerFactory: IProviderFactory
 ): () => Promise<void> {
   return async () => {
     try {
-      const git = await getGitAPI();
-      const repo = await getActiveRepository(git);
+      const repo = await gitService.getActiveRepository();
 
-      const diff = await getStagedDiff(repo.rootUri.fsPath);
+      const diff = await gitService.getStagedDiff(repo.rootPath);
       if (!diff.trim()) {
         vscode.window.showWarningMessage(
           "No staged changes found. Stage some changes first."
@@ -87,7 +86,7 @@ export function generateHandler(
           }
         );
 
-        repo.inputBox.value = message;
+        repo.setCommitMessage(message);
       } finally {
         provider.dispose();
       }
