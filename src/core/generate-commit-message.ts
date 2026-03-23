@@ -1,5 +1,6 @@
-import { IConfigService, IGitService, IProviderFactory, ISecretStore } from "./ports";
+import { IConfigService, IGitService, IProviderFactory, ISecretStore, SECRET_KEY_PREFIX } from "./ports";
 import { getProviderForModel } from "../providers/models";
+import { NoDiffError, UnknownModelError, NoApiKeyError } from "./errors";
 
 export interface GenerateResult {
   message: string;
@@ -34,7 +35,7 @@ export async function generateCommitMessage(deps: {
   }
 
   const { providerId, provider: providerInfo } = info;
-  const secretKey = `commitMessageGen.apiKey.${providerId}`;
+  const secretKey = `${SECRET_KEY_PREFIX}${providerId}`;
 
   let apiKey = await secretStore.get(secretKey);
   if (!apiKey) {
@@ -54,14 +55,3 @@ export async function generateCommitMessage(deps: {
   }
 }
 
-export class NoDiffError extends Error {
-  readonly code = "NO_DIFF" as const;
-}
-
-export class UnknownModelError extends Error {
-  readonly code = "UNKNOWN_MODEL" as const;
-}
-
-export class NoApiKeyError extends Error {
-  readonly code = "NO_API_KEY" as const;
-}

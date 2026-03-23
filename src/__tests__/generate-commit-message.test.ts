@@ -1,10 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
-import {
-  generateCommitMessage,
-  NoDiffError,
-  UnknownModelError,
-  NoApiKeyError,
-} from "../core/generate-commit-message";
+import { generateCommitMessage } from "../core/generate-commit-message";
+import { NoDiffError, UnknownModelError, NoApiKeyError } from "../core/errors";
 import type {
   IGitService,
   ISecretStore,

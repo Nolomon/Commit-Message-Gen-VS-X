@@ -8,8 +8,7 @@ import {
   MODELS,
 } from "./providers/models";
 import { ConfigService } from "./infrastructure/config-service";
-
-const SECRET_KEY_PREFIX = "commitMessageGen.apiKey.";
+import { SECRET_KEY_PREFIX } from "./core/ports";
 
 export function activate(context: vscode.ExtensionContext) {
   const configService = new ConfigService();

@@ -3,6 +3,7 @@ import { ClaudeProvider } from "./claude";
 import { OpenAICompatibleProvider } from "./openai-compatible";
 import { GeminiProvider } from "./gemini";
 import { getProviderForModel, PROVIDERS } from "./models";
+import { UnknownModelError } from "../core/errors";
 
 export function createProvider(
   modelId: string,
@@ -10,7 +11,7 @@ export function createProvider(
 ): CommitMessageProvider {
   const info = getProviderForModel(modelId);
   if (!info) {
-    throw new Error(
+    throw new UnknownModelError(
       `Unknown model "${modelId}". Check your commitMessageGen.model setting.`
     );
   }
