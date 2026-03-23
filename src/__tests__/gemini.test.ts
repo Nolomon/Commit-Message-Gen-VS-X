@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { GeminiProvider } from "../providers/gemini";
-import { SYSTEM_PROMPT } from "../prompt";
+import { SYSTEM_PROMPT } from "../core/prompt";
 import { MAX_DIFF_CHARS } from "../providers/shared";
 
 function mockResponse(body: any, status = 200): Response {

@@ -1,5 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { SYSTEM_PROMPT } from "../prompt";
+import { SYSTEM_PROMPT } from "../core/prompt";
 import { CommitMessageProvider } from "./types";
 import { stripMarkdownFences, buildUserMessage, MAX_TOKENS } from "./shared";
 

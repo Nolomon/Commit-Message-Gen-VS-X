@@ -1,4 +1,4 @@
-import { USER_PROMPT_TEMPLATE } from "../prompt";
+import { USER_PROMPT_TEMPLATE } from "../core/prompt";
 
 export const MAX_DIFF_CHARS = 100_000;
 

@@ -5,7 +5,7 @@ import {
   MAX_DIFF_CHARS,
   MAX_TOKENS,
 } from "../providers/shared";
-import { USER_PROMPT_TEMPLATE } from "../prompt";
+import { USER_PROMPT_TEMPLATE } from "../core/prompt";
 
 describe("stripMarkdownFences", () => {
   it("returns plain text unchanged", () => {
