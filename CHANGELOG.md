@@ -2,6 +2,13 @@
 
 All notable changes to the "AI Commit Message Gen" extension will be documented in this file.
 
+## [0.1.2] - 2026-03-24
+
+### Fixed
+
+- Fixed commit messages sometimes retaining markdown code fences in the output
+- Fixed active repository not being recognized in multi-repo workspaces when the open file is at the repo root
+
 ## [0.1.1] - 2026-03-18
 
 ### Changed
