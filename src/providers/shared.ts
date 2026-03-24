@@ -5,7 +5,7 @@ export const MAX_DIFF_CHARS = 100_000;
 export const MAX_TOKENS = 1024;
 
 export function stripMarkdownFences(text: string): string {
-  const fenceRegex = /^```[\w]*\n?([\s\S]*?)\n?```$/;
+  const fenceRegex = /^```[\w]*\n((?:(?!```)[\s\S])*)\n```$/;
   const match = text.match(fenceRegex);
   return match ? match[1].trim() : text;
 }
