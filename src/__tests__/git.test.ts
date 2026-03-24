@@ -8,6 +8,11 @@ vi.mock("child_process", () => ({
 
 import { getGitAPI, getActiveRepository, getStagedDiff } from "../git";
 
+type GitAPI = Awaited<ReturnType<typeof getGitAPI>>;
+type Repository = Awaited<ReturnType<typeof getActiveRepository>>;
+type MockGitExtension = vscode.Extension<{ getAPI: (version: 1) => GitAPI }>;
+type RepoPickItem = { label: string; repo: Repository };
+type WritableMockWindow = { activeTextEditor: vscode.TextEditor | undefined };
 const mockExecFile = vi.mocked(execFile);
 const mockExtensions = vi.mocked(vscode.extensions);
 const mockWindow = vi.mocked(vscode.window);
@@ -30,7 +35,7 @@ describe("getGitAPI", () => {
       isActive: false,
       activate: mockActivate,
       exports: { getAPI: () => mockGitAPI },
-    } as any);
+    } as Partial<MockGitExtension> as MockGitExtension);
 
     await getGitAPI();
 
@@ -44,7 +49,7 @@ describe("getGitAPI", () => {
       isActive: true,
       activate: mockActivate,
       exports: { getAPI: () => mockGitAPI },
-    } as any);
+    } as Partial<MockGitExtension> as MockGitExtension);
 
     await getGitAPI();
 
@@ -56,7 +61,7 @@ describe("getGitAPI", () => {
     mockExtensions.getExtension.mockReturnValue({
       isActive: true,
       exports: { getAPI: () => mockGitAPI },
-    } as any);
+    } as Partial<MockGitExtension> as MockGitExtension);
 
     const result = await getGitAPI();
     expect(result).toBe(mockGitAPI);
@@ -66,12 +71,12 @@ describe("getGitAPI", () => {
 describe("getActiveRepository", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    (mockWindow as any).activeTextEditor = undefined;
+    (mockWindow as WritableMockWindow).activeTextEditor = undefined;
   });
 
   it("throws when no repositories", async () => {
     await expect(
-      getActiveRepository({ repositories: [] } as any)
+      getActiveRepository({ repositories: [] } as Partial<GitAPI> as GitAPI)
     ).rejects.toThrow("No Git repositories found");
   });
 
@@ -79,7 +84,7 @@ describe("getActiveRepository", () => {
     const repo = { rootUri: { fsPath: "/repo" } };
     const result = await getActiveRepository({
       repositories: [repo],
-    } as any);
+    } as Partial<GitAPI> as GitAPI);
     expect(result).toBe(repo);
   });
 
@@ -87,13 +92,13 @@ describe("getActiveRepository", () => {
     const repo1 = { rootUri: { fsPath: "/repo1" } };
     const repo2 = { rootUri: { fsPath: "/repo2" } };
 
-    (mockWindow as any).activeTextEditor = {
+    (mockWindow as WritableMockWindow).activeTextEditor = {
       document: { uri: { fsPath: "/repo2/src/file.ts" } },
-    };
+    } as Partial<vscode.TextEditor> as vscode.TextEditor;
 
     const result = await getActiveRepository({
       repositories: [repo1, repo2],
-    } as any);
+    } as Partial<GitAPI> as GitAPI);
     expect(result).toBe(repo2);
   });
 
@@ -101,15 +106,15 @@ describe("getActiveRepository", () => {
     const repo1 = { rootUri: { fsPath: "/repo1" } };
     const repo2 = { rootUri: { fsPath: "/repo2" } };
 
-    (mockWindow as any).activeTextEditor = undefined;
+    (mockWindow as WritableMockWindow).activeTextEditor = undefined;
     mockWindow.showQuickPick.mockResolvedValueOnce({
       label: "/repo1",
       repo: repo1,
-    } as any);
+    } as Partial<RepoPickItem> as RepoPickItem);
 
     const result = await getActiveRepository({
       repositories: [repo1, repo2],
-    } as any);
+    } as Partial<GitAPI> as GitAPI);
     expect(mockWindow.showQuickPick).toHaveBeenCalledOnce();
     expect(result).toBe(repo1);
   });
@@ -118,12 +123,46 @@ describe("getActiveRepository", () => {
     const repo1 = { rootUri: { fsPath: "/repo1" } };
     const repo2 = { rootUri: { fsPath: "/repo2" } };
 
-    (mockWindow as any).activeTextEditor = undefined;
+    (mockWindow as WritableMockWindow).activeTextEditor = undefined;
     mockWindow.showQuickPick.mockResolvedValueOnce(undefined);
 
     await expect(
-      getActiveRepository({ repositories: [repo1, repo2] } as any)
+      getActiveRepository({ repositories: [repo1, repo2] } as Partial<GitAPI> as GitAPI)
     ).rejects.toThrow("No repository selected");
+  });
+
+  it("shows quick pick when editor file is outside all repo roots", async () => {
+    const repo1 = { rootUri: { fsPath: "/repo1" } };
+    const repo2 = { rootUri: { fsPath: "/repo2" } };
+
+    (mockWindow as WritableMockWindow).activeTextEditor = {
+      document: { uri: { fsPath: "/unrelated/file.ts" } },
+    } as Partial<vscode.TextEditor> as vscode.TextEditor;
+    mockWindow.showQuickPick.mockResolvedValueOnce({
+      label: "/repo2",
+      repo: repo2,
+    } as Partial<RepoPickItem> as RepoPickItem);
+
+    const result = await getActiveRepository({
+      repositories: [repo1, repo2],
+    } as Partial<GitAPI> as GitAPI);
+    expect(mockWindow.showQuickPick).toHaveBeenCalledOnce();
+    expect(result).toBe(repo2);
+  });
+
+  it("does not false-positive on a path that is a prefix of another repo root", async () => {
+    // /repo1 is a prefix of /repo12 — startsWith would wrongly match repo1
+    const repo1 = { rootUri: { fsPath: "/repo1" } };
+    const repo12 = { rootUri: { fsPath: "/repo12" } };
+
+    (mockWindow as WritableMockWindow).activeTextEditor = {
+      document: { uri: { fsPath: "/repo12/src/file.ts" } },
+    } as Partial<vscode.TextEditor> as vscode.TextEditor;
+
+    const result = await getActiveRepository({
+      repositories: [repo1, repo12],
+    } as Partial<GitAPI> as GitAPI);
+    expect(result).toBe(repo12);
   });
 });
 
@@ -134,9 +173,9 @@ describe("getStagedDiff", () => {
 
   it("resolves with stdout on success", async () => {
     mockExecFile.mockImplementation(
-      ((_cmd: any, _args: any, _opts: any, callback: any) => {
+      ((_cmd: string, _args: string[], _opts: object, callback: (error: Error | null, stdout: string, stderr: string) => void) => {
         callback(null, "diff content", "");
-      }) as any
+      }) as unknown as typeof execFile
     );
 
     const result = await getStagedDiff("/test/repo");
@@ -145,9 +184,9 @@ describe("getStagedDiff", () => {
 
   it("calls git with correct arguments", async () => {
     mockExecFile.mockImplementation(
-      ((_cmd: any, _args: any, _opts: any, callback: any) => {
+      ((_cmd: string, _args: string[], _opts: object, callback: (error: Error | null, stdout: string, stderr: string) => void) => {
         callback(null, "", "");
-      }) as any
+      }) as unknown as typeof execFile
     );
 
     await getStagedDiff("/test/repo");
@@ -162,9 +201,9 @@ describe("getStagedDiff", () => {
 
   it("rejects with stderr on error", async () => {
     mockExecFile.mockImplementation(
-      ((_cmd: any, _args: any, _opts: any, callback: any) => {
+      ((_cmd: string, _args: string[], _opts: object, callback: (error: Error | null, stdout: string, stderr: string) => void) => {
         callback(new Error("fail"), "", "fatal: not a repo");
-      }) as any
+      }) as unknown as typeof execFile
     );
 
     await expect(getStagedDiff("/test/repo")).rejects.toThrow(
@@ -174,9 +213,9 @@ describe("getStagedDiff", () => {
 
   it("rejects with error.message when no stderr", async () => {
     mockExecFile.mockImplementation(
-      ((_cmd: any, _args: any, _opts: any, callback: any) => {
+      ((_cmd: string, _args: string[], _opts: object, callback: (error: Error | null, stdout: string, stderr: string) => void) => {
         callback(new Error("ENOENT"), "", "");
-      }) as any
+      }) as unknown as typeof execFile
     );
 
     await expect(getStagedDiff("/test/repo")).rejects.toThrow("ENOENT");

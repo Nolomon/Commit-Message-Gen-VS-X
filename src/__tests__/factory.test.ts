@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 
 vi.mock("@anthropic-ai/sdk", () => {
-  const MockAnthropic = vi.fn(function (this: any) {
+  const MockAnthropic = vi.fn(function (this: { messages: { create: ReturnType<typeof vi.fn> } }) {
     this.messages = { create: vi.fn() };
   });
   return { default: MockAnthropic };
@@ -12,6 +12,11 @@ import { ClaudeProvider } from "../providers/claude";
 import { OpenAICompatibleProvider } from "../providers/openai-compatible";
 import { GeminiProvider } from "../providers/gemini";
 import { PROVIDERS } from "../providers/models";
+import { UnknownModelError } from "../core/errors";
+import * as registry from "../providers/registry";
+import * as models from "../providers/models";
+
+type ModelLookup = ReturnType<typeof models.getProviderForModel>;
 
 describe("createProvider", () => {
   it("returns ClaudeProvider for anthropic models", () => {
@@ -44,9 +49,32 @@ describe("createProvider", () => {
     expect(provider.name).toBe("Mistral");
   });
 
-  it("throws for unknown model ID", () => {
+  it("throws UnknownModelError for unknown model ID", () => {
     expect(() => createProvider("unknown-model", "test-key")).toThrow(
-      'Unknown model "unknown-model"'
+      UnknownModelError
+    );
+  });
+
+  it("unknown model error has correct message and code", () => {
+    let thrown: unknown;
+    try {
+      createProvider("unknown-model", "test-key");
+    } catch (e) {
+      thrown = e;
+    }
+    expect(thrown).toBeInstanceOf(UnknownModelError);
+    expect((thrown as UnknownModelError).message).toContain('"unknown-model"');
+    expect((thrown as UnknownModelError).code).toBe("UNKNOWN_MODEL");
+  });
+
+  it("throws when provider creator is not registered for a known model", () => {
+    vi.spyOn(models, "getProviderForModel").mockReturnValueOnce(
+      { providerId: "anthropic" } as unknown as ModelLookup
+    );
+    vi.spyOn(registry, "getProviderCreator").mockReturnValueOnce(undefined);
+
+    expect(() => createProvider("claude-sonnet-4-6", "key")).toThrow(
+      'No provider registered for "anthropic"'
     );
   });
 

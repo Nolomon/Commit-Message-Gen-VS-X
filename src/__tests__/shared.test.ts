@@ -62,6 +62,15 @@ describe("stripMarkdownFences", () => {
       stripMarkdownFences("```\n  fix(auth): handle null  \n```")
     ).toBe("fix(auth): handle null");
   });
+
+  it("does not strip two separate fence blocks", () => {
+    const input = "```\nfirst\n```\n\n```\nsecond\n```";
+    expect(stripMarkdownFences(input)).toBe(input);
+  });
+
+  it("preserves nested backticks inside a fence", () => {
+    expect(stripMarkdownFences("```\n`inner`\n```")).toBe("`inner`");
+  });
 });
 
 describe("buildUserMessage", () => {
@@ -96,6 +105,12 @@ describe("buildUserMessage", () => {
     const result = buildUserMessage(diff);
     const templatePrefix = USER_PROMPT_TEMPLATE.split("{diff}")[0];
     expect(result).toContain(templatePrefix);
+  });
+
+  it("truncates a diff at exactly MAX_DIFF_CHARS + 1", () => {
+    const diff = "a".repeat(MAX_DIFF_CHARS + 1);
+    const result = buildUserMessage(diff);
+    expect(result).toContain("... [diff truncated due to size]");
   });
 });
 

@@ -36,6 +36,7 @@ function createMockDeps(overrides?: {
     } satisfies IGitService,
     configService: {
       getModelId: vi.fn().mockReturnValue("claude-sonnet-4-6"),
+      setModelId: vi.fn().mockResolvedValue(undefined),
       ...overrides?.configService,
     } satisfies IConfigService,
     secretStore: {
