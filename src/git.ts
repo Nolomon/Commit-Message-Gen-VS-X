@@ -49,7 +49,8 @@ export async function getActiveRepository(
   if (activeEditor) {
     const activeUri = activeEditor.document.uri;
     const match = repos.find((repo) =>
-      activeUri.fsPath.startsWith(repo.rootUri.fsPath)
+      activeUri.fsPath.startsWith(repo.rootUri.fsPath + "/") ||
+      activeUri.fsPath === repo.rootUri.fsPath
     );
     if (match) {
       return match;
