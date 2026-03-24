@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 const mockCreate = vi.fn();
 
 vi.mock("@anthropic-ai/sdk", () => {
-  const MockAnthropic = vi.fn(function (this: any) {
+  const MockAnthropic = vi.fn(function (this: { messages: { create: typeof mockCreate } }) {
     this.messages = { create: mockCreate };
   });
   return { default: MockAnthropic };

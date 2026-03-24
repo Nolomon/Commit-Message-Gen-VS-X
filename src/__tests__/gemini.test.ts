@@ -3,7 +3,7 @@ import { GeminiProvider } from "../providers/gemini";
 import { SYSTEM_PROMPT } from "../core/prompt";
 import { MAX_DIFF_CHARS } from "../providers/shared";
 
-function mockResponse(body: any, status = 200): Response {
+function mockResponse(body: unknown, status = 200): Response {
   return {
     ok: status >= 200 && status < 300,
     status,
@@ -12,7 +12,7 @@ function mockResponse(body: any, status = 200): Response {
         typeof body === "string" ? body : JSON.stringify(body)
       ),
     json: () => Promise.resolve(body),
-  } as unknown as Response;
+  } as Partial<Response> as Response;
 }
 
 describe("GeminiProvider", () => {

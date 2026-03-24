@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import * as vscode from "vscode";
 
 vi.mock("@anthropic-ai/sdk", () => {
-  const MockAnthropic = vi.fn(function (this: any) {
+  const MockAnthropic = vi.fn(function (this: { messages: { create: ReturnType<typeof vi.fn> } }) {
     this.messages = { create: vi.fn() };
   });
   return { default: MockAnthropic };
@@ -17,7 +17,7 @@ import { activate, deactivate } from "../extension";
 const mockCommands = vi.mocked(vscode.commands);
 
 describe("activate", () => {
-  let mockContext: any;
+  let mockContext: vscode.ExtensionContext;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -27,8 +27,8 @@ describe("activate", () => {
         get: vi.fn(),
         store: vi.fn(),
         delete: vi.fn(),
-      },
-    };
+      } as Partial<vscode.SecretStorage> as vscode.SecretStorage,
+    } as Partial<vscode.ExtensionContext> as vscode.ExtensionContext;
   });
 
   it("registers 4 commands", () => {
