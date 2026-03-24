@@ -1,0 +1,51 @@
+name: Bug Report
+description: Something isn't working as expected
+labels: [bug]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the bug. What did you expect instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Stage changes
+        2. Click generate
+        3. ...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: model
+    attributes:
+      label: Model in use
+      options:
+        - Claude Sonnet 4.6
+        - Claude Opus 4.6
+        - Claude Haiku 4.5
+        - GPT-4o
+        - GPT-4o Mini
+        - o3-mini
+        - Gemini 2.5 Pro
+        - Gemini 2.0 Flash
+        - DeepSeek V3
+        - DeepSeek R1
+        - Mistral Large
+        - Mistral Codestral
+        - Not sure
+    validations:
+      required: true
+
+  - type: input
+    id: vscode-version
+    attributes:
+      label: VS Code version
+      placeholder: "e.g. 1.99.0"
+    validations:
+      required: false
