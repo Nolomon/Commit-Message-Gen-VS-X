@@ -12,6 +12,10 @@ Generate commit messages in VS Code without leaving your editor:
 2. Click the feather button in the Source Control title bar.
 3. The extension writes an AI-generated commit message into the commit input box.
 
+<p align="center">
+  <img src="resources/demo.gif" alt="Usage demo" />
+</p>
+
 On first use, the extension prompts you for an API key for the currently selected model provider.
 
 ## Why Use This Extension
