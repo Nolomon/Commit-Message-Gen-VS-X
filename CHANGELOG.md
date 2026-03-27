@@ -1,6 +1,12 @@
 # Changelog
 
-All notable changes to the "AI Commit Message Gen" extension will be documented in this file.
+All notable changes will be documented in this file.
+
+## [0.1.3] - 2026-03-27
+
+### Changed
+
+- Added usage demo GIF to README for Marketplace listing
 
 ## [0.1.2] - 2026-03-24
 
