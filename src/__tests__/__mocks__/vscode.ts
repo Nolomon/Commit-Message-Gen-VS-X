@@ -12,7 +12,7 @@ export const window = {
 
 export const commands = {
   registerCommand: vi.fn((_id: string, _handler: Function) => ({ dispose: vi.fn() })),
-  executeCommand: vi.fn(),
+  executeCommand: vi.fn().mockResolvedValue(undefined),
 };
 
 export const workspace = {

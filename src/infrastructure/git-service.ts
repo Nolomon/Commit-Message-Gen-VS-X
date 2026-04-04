@@ -26,6 +26,9 @@ export class GitService implements IGitService {
       rootPath: repo.rootUri.fsPath,
       setCommitMessage(message: string) {
         repo.inputBox.value = message;
+        vscode.commands.executeCommand("workbench.scm.focus").then(() => {
+          vscode.commands.executeCommand("cursorTop");
+        });
       },
     };
   }
