@@ -1,6 +1,6 @@
 import { SYSTEM_PROMPT } from "../core/prompt";
 import { CommitMessageProvider } from "./types";
-import { stripMarkdownFences, buildUserMessage, MAX_TOKENS } from "./shared";
+import { stripMarkdownFences, buildUserMessage, withRetry, MAX_TOKENS } from "./shared";
 import { registerProvider } from "./registry";
 import { PROVIDERS } from "./models";
 
@@ -23,38 +23,40 @@ export class OpenAICompatibleProvider implements CommitMessageProvider {
   }
 
   async generate(diff: string): Promise<string> {
-    const userMessage = buildUserMessage(diff);
+    return withRetry(async (effectiveDiff) => {
+      const userMessage = buildUserMessage(effectiveDiff);
 
-    const response = await fetch(`${this.baseUrl}/chat/completions`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${this.apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: this.model,
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: userMessage },
-        ],
-        max_tokens: MAX_TOKENS,
-      }),
-    });
+      const response = await fetch(`${this.baseUrl}/chat/completions`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${this.apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: this.model,
+          messages: [
+            { role: "system", content: SYSTEM_PROMPT },
+            { role: "user", content: userMessage },
+          ],
+          max_tokens: MAX_TOKENS,
+        }),
+      });
 
-    if (!response.ok) {
-      const errorBody = await response.text();
-      throw new Error(`API request failed (${response.status}): ${errorBody}`);
-    }
+      if (!response.ok) {
+        const errorBody = await response.text();
+        throw new Error(`API request failed (${response.status}): ${errorBody}`);
+      }
 
-    const data = (await response.json()) as {
-      choices?: { message?: { content?: string } }[];
-    };
-    const content = data.choices?.[0]?.message?.content;
-    if (!content) {
-      throw new Error("No content in API response");
-    }
+      const data = (await response.json()) as {
+        choices?: { message?: { content?: string } }[];
+      };
+      const content = data.choices?.[0]?.message?.content;
+      if (!content) {
+        throw new Error("No content in API response");
+      }
 
-    return stripMarkdownFences(content.trim());
+      return stripMarkdownFences(content.trim());
+    }, diff);
   }
 
   dispose(): void {

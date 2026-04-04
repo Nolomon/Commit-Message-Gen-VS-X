@@ -1,7 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { SYSTEM_PROMPT } from "../core/prompt";
 import { CommitMessageProvider } from "./types";
-import { stripMarkdownFences, buildUserMessage, MAX_TOKENS } from "./shared";
+import { stripMarkdownFences, buildUserMessage, withRetry, MAX_TOKENS } from "./shared";
 import { registerProvider } from "./registry";
 
 export class ClaudeProvider implements CommitMessageProvider {
@@ -15,21 +15,23 @@ export class ClaudeProvider implements CommitMessageProvider {
   }
 
   async generate(diff: string): Promise<string> {
-    const userMessage = buildUserMessage(diff);
+    return withRetry(async (effectiveDiff) => {
+      const userMessage = buildUserMessage(effectiveDiff);
 
-    const response = await this.client.messages.create({
-      model: this.model,
-      max_tokens: MAX_TOKENS,
-      system: SYSTEM_PROMPT,
-      messages: [{ role: "user", content: userMessage }],
-    });
+      const response = await this.client.messages.create({
+        model: this.model,
+        max_tokens: MAX_TOKENS,
+        system: SYSTEM_PROMPT,
+        messages: [{ role: "user", content: userMessage }],
+      });
 
-    const textBlock = response.content.find((block) => block.type === "text");
-    if (!textBlock || textBlock.type !== "text") {
-      throw new Error("No text content in AI response");
-    }
+      const textBlock = response.content.find((block) => block.type === "text");
+      if (!textBlock || textBlock.type !== "text") {
+        throw new Error("No text content in AI response");
+      }
 
-    return stripMarkdownFences(textBlock.text.trim());
+      return stripMarkdownFences(textBlock.text.trim());
+    }, diff);
   }
 
   dispose(): void {
