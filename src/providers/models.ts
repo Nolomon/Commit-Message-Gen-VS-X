@@ -45,7 +45,7 @@ export const MODELS: Record<string, ModelInfo> = {
   "o4-mini": { provider: "openai", displayName: "o4-mini" },
   // Google Gemini
   "gemini-2.5-pro": { provider: "google", displayName: "Gemini 2.5 Pro" },
-  "gemini-2.0-flash": { provider: "google", displayName: "Gemini 2.0 Flash" },
+  "gemini-2.5-flash": { provider: "google", displayName: "Gemini 2.5 Flash" },
   // DeepSeek
   "deepseek-chat": { provider: "deepseek", displayName: "DeepSeek V3" },
   "deepseek-reasoner": { provider: "deepseek", displayName: "DeepSeek R1" },

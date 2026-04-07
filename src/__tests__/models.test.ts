@@ -73,7 +73,7 @@ describe("getProviderForModel", () => {
   });
 
   it("returns correct info for a Google model", () => {
-    const result = getProviderForModel("gemini-2.0-flash");
+    const result = getProviderForModel("gemini-2.5-flash");
     expect(result).toBeDefined();
     expect(result!.providerId).toBe("google");
   });
