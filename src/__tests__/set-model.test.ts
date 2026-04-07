@@ -93,16 +93,16 @@ describe("setModelHandler", () => {
 
   it("calls setModelId and shows confirmation when user picks a different model", async () => {
     const picked: ModelQuickPickItem = {
-      modelId: "gpt-4o",
-      label: MODELS["gpt-4o"].displayName,
+      modelId: "gpt-4.1",
+      label: MODELS["gpt-4.1"].displayName,
     };
     mockWindow.showQuickPick.mockResolvedValueOnce(picked);
 
     await makeHandler()();
 
-    expect(mockConfigService.setModelId).toHaveBeenCalledWith("gpt-4o");
+    expect(mockConfigService.setModelId).toHaveBeenCalledWith("gpt-4.1");
     expect(mockWindow.showInformationMessage).toHaveBeenCalledWith(
-      `Model set to ${MODELS["gpt-4o"].displayName}.`
+      `Model set to ${MODELS["gpt-4.1"].displayName}.`
     );
   });
 });

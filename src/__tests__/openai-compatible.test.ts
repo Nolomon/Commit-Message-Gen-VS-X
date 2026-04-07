@@ -24,7 +24,7 @@ describe("OpenAICompatibleProvider", () => {
     vi.stubGlobal("fetch", mockFetch);
     provider = new OpenAICompatibleProvider(
       "test-api-key",
-      "gpt-4o",
+      "gpt-4.1",
       "https://api.openai.com/v1",
       "GPT"
     );
@@ -77,8 +77,8 @@ describe("OpenAICompatibleProvider", () => {
     await provider.generate("my diff content");
 
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
-    expect(body.model).toBe("gpt-4o");
-    expect(body.max_tokens).toBe(MAX_TOKENS);
+    expect(body.model).toBe("gpt-4.1");
+    expect(body.max_completion_tokens).toBe(MAX_TOKENS);
     expect(body.messages).toHaveLength(2);
     expect(body.messages[0].role).toBe("system");
     expect(body.messages[0].content).toBe(SYSTEM_PROMPT);

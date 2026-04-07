@@ -67,7 +67,7 @@ describe("getProviderForModel", () => {
   });
 
   it("returns correct info for an OpenAI model", () => {
-    const result = getProviderForModel("gpt-4o");
+    const result = getProviderForModel("gpt-4.1");
     expect(result).toBeDefined();
     expect(result!.providerId).toBe("openai");
   });

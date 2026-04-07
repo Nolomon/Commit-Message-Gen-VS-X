@@ -40,9 +40,9 @@ export const MODELS: Record<string, ModelInfo> = {
     displayName: "Claude Haiku 4.5",
   },
   // OpenAI
-  "gpt-4o": { provider: "openai", displayName: "GPT-4o" },
-  "gpt-4o-mini": { provider: "openai", displayName: "GPT-4o Mini" },
-  "o3-mini": { provider: "openai", displayName: "o3-mini" },
+  "gpt-4.1": { provider: "openai", displayName: "GPT-4.1" },
+  "gpt-4.1-mini": { provider: "openai", displayName: "GPT-4.1 Mini" },
+  "o4-mini": { provider: "openai", displayName: "o4-mini" },
   // Google Gemini
   "gemini-2.5-pro": { provider: "google", displayName: "Gemini 2.5 Pro" },
   "gemini-2.0-flash": { provider: "google", displayName: "Gemini 2.0 Flash" },
