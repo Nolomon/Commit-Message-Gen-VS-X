@@ -33,7 +33,7 @@ body:
         - GPT-4.1 Mini
         - o4-mini
         - Gemini 2.5 Pro
-        - Gemini 2.0 Flash
+        - Gemini 2.5 Flash
         - DeepSeek V3
         - DeepSeek R1
         - Mistral Large
