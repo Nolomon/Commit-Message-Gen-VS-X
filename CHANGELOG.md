@@ -2,6 +2,22 @@
 
 All notable changes will be documented in this file.
 
+## [0.2.0] - 2026-04-07
+
+### Added
+
+- Generation now works reliably on large commits by automatically trimming oversized diffs
+
+### Changed
+
+- Updated to the latest models for OpenAI (GPT-4.1, o4-mini), Gemini (2.5 Flash), DeepSeek, and Mistral
+- Better support for OpenAI-compatible providers
+- Improved stability during network interruptions
+
+### Fixed
+
+- Fixed commit message box scrolling to the bottom after generation
+
 ## [0.1.3] - 2026-03-27
 
 ### Changed
