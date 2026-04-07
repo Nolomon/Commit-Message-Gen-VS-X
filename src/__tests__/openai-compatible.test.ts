@@ -161,6 +161,19 @@ describe("OpenAICompatibleProvider", () => {
     );
   });
 
+  it("throws when response body is not valid JSON", async () => {
+    const badResponse = {
+      ok: true,
+      status: 200,
+      json: () => Promise.reject(new SyntaxError("Unexpected token")),
+    } as Partial<Response> as Response;
+    mockFetch.mockResolvedValueOnce(badResponse);
+
+    await expect(provider.generate("diff")).rejects.toThrow(
+      "Failed to parse API response as JSON"
+    );
+  });
+
   it("propagates fetch errors (network failure)", async () => {
     mockFetch.mockRejectedValueOnce(new Error("Network error"));
 
