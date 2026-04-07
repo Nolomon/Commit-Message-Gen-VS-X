@@ -79,6 +79,7 @@ describe("OpenAICompatibleProvider", () => {
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
     expect(body.model).toBe("gpt-4.1");
     expect(body.max_completion_tokens).toBe(MAX_TOKENS);
+    expect(body.max_tokens).toBeUndefined();
     expect(body.messages).toHaveLength(2);
     expect(body.messages[0].role).toBe("system");
     expect(body.messages[0].content).toBe(SYSTEM_PROMPT);
@@ -192,6 +193,25 @@ describe("OpenAICompatibleProvider", () => {
     expect(body.messages[1].content).toContain(
       "... [diff truncated due to size]"
     );
+  });
+
+  it("uses max_tokens when configured", async () => {
+    const mistralProvider = new OpenAICompatibleProvider(
+      "key",
+      "mistral-large-latest",
+      "https://api.mistral.ai/v1",
+      "Mistral",
+      "max_tokens"
+    );
+    mockFetch.mockResolvedValueOnce(
+      mockResponse({ choices: [{ message: { content: "fix: thing" } }] })
+    );
+
+    await mistralProvider.generate("diff");
+
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.max_tokens).toBe(MAX_TOKENS);
+    expect(body.max_completion_tokens).toBeUndefined();
   });
 
   it("works with different base URLs", async () => {
