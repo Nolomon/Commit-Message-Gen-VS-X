@@ -33,7 +33,7 @@ Use the commit message generator with models from Anthropic, OpenAI, Google, Dee
 | Provider | Models |
 | -------- | ------ |
 | **Claude** (Anthropic) | Sonnet 4.6, Opus 4.6, Haiku 4.5 |
-| **GPT** (OpenAI) | GPT-4o, GPT-4o Mini, o3-mini |
+| **GPT** (OpenAI) | GPT-4.1, GPT-4.1 Mini, o4-mini |
 | **Gemini** (Google) | 2.5 Pro, 2.0 Flash |
 | **DeepSeek** | V3, R1 |
 | **Mistral** | Large, Codestral |
