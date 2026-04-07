@@ -23,14 +23,14 @@ describe("ConfigService", () => {
 
   describe("getModelId", () => {
     it("returns the value from workspace configuration", () => {
-      const mockGet = vi.fn().mockReturnValue("gpt-4o");
+      const mockGet = vi.fn().mockReturnValue("gpt-4.1");
       mockWorkspace.getConfiguration.mockReturnValue(makeConfig({ get: mockGet }));
 
-      expect(service.getModelId()).toBe("gpt-4o");
+      expect(service.getModelId()).toBe("gpt-4.1");
     });
 
     it("reads from the 'commitMessageGen' section", () => {
-      const mockGet = vi.fn().mockReturnValue("gpt-4o");
+      const mockGet = vi.fn().mockReturnValue("gpt-4.1");
       mockWorkspace.getConfiguration.mockReturnValue(makeConfig({ get: mockGet }));
 
       service.getModelId();
@@ -60,11 +60,11 @@ describe("ConfigService", () => {
       const mockUpdate = vi.fn().mockResolvedValue(undefined);
       mockWorkspace.getConfiguration.mockReturnValue(makeConfig({ update: mockUpdate }));
 
-      await service.setModelId("gpt-4o");
+      await service.setModelId("gpt-4.1");
 
       expect(mockUpdate).toHaveBeenCalledWith(
         "model",
-        "gpt-4o",
+        "gpt-4.1",
         vscode.ConfigurationTarget.Global
       );
     });
@@ -73,7 +73,7 @@ describe("ConfigService", () => {
       const mockUpdate = vi.fn().mockResolvedValue(undefined);
       mockWorkspace.getConfiguration.mockReturnValue(makeConfig({ update: mockUpdate }));
 
-      await service.setModelId("gpt-4o");
+      await service.setModelId("gpt-4.1");
 
       expect(mockWorkspace.getConfiguration).toHaveBeenCalledWith("commitMessageGen");
     });

@@ -32,7 +32,7 @@ describe("createProvider", () => {
   });
 
   it("returns OpenAICompatibleProvider for openai models", () => {
-    const provider = createProvider("gpt-4o", "test-key");
+    const provider = createProvider("gpt-4.1", "test-key");
     expect(provider).toBeInstanceOf(OpenAICompatibleProvider);
     expect(provider.name).toBe("GPT");
   });
@@ -83,8 +83,8 @@ describe("createProvider", () => {
     const testCases: [string, string][] = [
       ["claude-opus-4-6", "Anthropic Claude"],
       ["claude-haiku-4-5", "Anthropic Claude"],
-      ["gpt-4o-mini", "GPT"],
-      ["o3-mini", "GPT"],
+      ["gpt-4.1-mini", "GPT"],
+      ["o4-mini", "GPT"],
       ["gemini-2.5-pro", "Google Gemini"],
       ["deepseek-reasoner", "DeepSeek"],
       ["codestral-latest", "Mistral"],
