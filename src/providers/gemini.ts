@@ -36,9 +36,14 @@ export class GeminiProvider implements CommitMessageProvider {
         );
       }
 
-      const data = (await response.json()) as {
+      let data: {
         candidates?: { content?: { parts?: { text?: string }[] } }[];
       };
+      try {
+        data = (await response.json()) as typeof data;
+      } catch {
+        throw new Error("Failed to parse Gemini API response as JSON");
+      }
       const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
       if (!content) {
         throw new Error("No content in Gemini API response");

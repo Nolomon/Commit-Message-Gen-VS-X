@@ -168,6 +168,19 @@ describe("GeminiProvider", () => {
     );
   });
 
+  it("throws when response body is not valid JSON", async () => {
+    const badResponse = {
+      ok: true,
+      status: 200,
+      json: () => Promise.reject(new SyntaxError("Unexpected token")),
+    } as Partial<Response> as Response;
+    mockFetch.mockResolvedValueOnce(badResponse);
+
+    await expect(provider.generate("diff")).rejects.toThrow(
+      "Failed to parse Gemini API response as JSON"
+    );
+  });
+
   it("propagates fetch errors", async () => {
     mockFetch.mockRejectedValueOnce(new Error("Network error"));
 

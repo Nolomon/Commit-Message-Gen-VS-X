@@ -47,9 +47,12 @@ export class OpenAICompatibleProvider implements CommitMessageProvider {
         throw new Error(`API request failed (${response.status}): ${errorBody}`);
       }
 
-      const data = (await response.json()) as {
-        choices?: { message?: { content?: string } }[];
-      };
+      let data: { choices?: { message?: { content?: string } }[] };
+      try {
+        data = (await response.json()) as typeof data;
+      } catch {
+        throw new Error("Failed to parse API response as JSON");
+      }
       const content = data.choices?.[0]?.message?.content;
       if (!content) {
         throw new Error("No content in API response");
