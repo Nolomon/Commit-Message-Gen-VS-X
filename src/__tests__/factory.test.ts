@@ -26,7 +26,7 @@ describe("createProvider", () => {
   });
 
   it("returns GeminiProvider for google models", () => {
-    const provider = createProvider("gemini-2.0-flash", "test-key");
+    const provider = createProvider("gemini-2.5-flash", "test-key");
     expect(provider).toBeInstanceOf(GeminiProvider);
     expect(provider.name).toBe("Google Gemini");
   });
