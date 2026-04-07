@@ -9,17 +9,20 @@ export class OpenAICompatibleProvider implements CommitMessageProvider {
   private apiKey: string;
   private model: string;
   private baseUrl: string;
+  private tokenParam: string;
 
   constructor(
     apiKey: string,
     model: string,
     baseUrl: string,
-    name: string
+    name: string,
+    tokenParam: "max_tokens" | "max_completion_tokens" = "max_completion_tokens"
   ) {
     this.apiKey = apiKey;
     this.model = model;
     this.baseUrl = baseUrl;
     this.name = name;
+    this.tokenParam = tokenParam;
   }
 
   async generate(diff: string): Promise<string> {
@@ -38,7 +41,7 @@ export class OpenAICompatibleProvider implements CommitMessageProvider {
             { role: "system", content: SYSTEM_PROMPT },
             { role: "user", content: userMessage },
           ],
-          max_completion_tokens: MAX_TOKENS,
+          [this.tokenParam]: MAX_TOKENS,
         }),
       });
 
@@ -70,6 +73,6 @@ export class OpenAICompatibleProvider implements CommitMessageProvider {
 for (const providerId of ["openai", "deepseek", "mistral"] as const) {
   const info = PROVIDERS[providerId];
   registerProvider(providerId, (apiKey, modelId) =>
-    new OpenAICompatibleProvider(apiKey, modelId, info.baseUrl!, info.displayName)
+    new OpenAICompatibleProvider(apiKey, modelId, info.baseUrl!, info.displayName, info.tokenParam)
   );
 }

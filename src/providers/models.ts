@@ -8,6 +8,8 @@ export type ProviderId =
 export interface ProviderInfo {
   displayName: string;
   baseUrl?: string;
+  /** The request body field name for limiting output tokens. */
+  tokenParam?: "max_tokens" | "max_completion_tokens";
 }
 
 export interface ModelInfo {
@@ -19,10 +21,10 @@ export const DEFAULT_MODEL_ID = "claude-sonnet-4-6";
 
 export const PROVIDERS: Record<ProviderId, ProviderInfo> = {
   anthropic: { displayName: "Claude" },
-  openai: { displayName: "GPT", baseUrl: "https://api.openai.com/v1" },
+  openai: { displayName: "GPT", baseUrl: "https://api.openai.com/v1", tokenParam: "max_completion_tokens" },
   google: { displayName: "Gemini" },
-  deepseek: { displayName: "DeepSeek", baseUrl: "https://api.deepseek.com" },
-  mistral: { displayName: "Mistral", baseUrl: "https://api.mistral.ai/v1" },
+  deepseek: { displayName: "DeepSeek", baseUrl: "https://api.deepseek.com", tokenParam: "max_completion_tokens" },
+  mistral: { displayName: "Mistral", baseUrl: "https://api.mistral.ai/v1", tokenParam: "max_tokens" },
 };
 
 export const MODELS: Record<string, ModelInfo> = {
