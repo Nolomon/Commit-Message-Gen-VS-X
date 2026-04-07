@@ -103,9 +103,9 @@
             "GPT — o4-mini",
             "Gemini — 2.5 Pro",
             "Gemini — 2.5 Flash",
-            "DeepSeek — V3",
-            "DeepSeek — R1",
-            "Mistral — Large",
+            "DeepSeek — V3.2",
+            "DeepSeek — V3.2 Reasoner",
+            "Mistral — Large 3",
             "Mistral — Codestral"
           ],
           "markdownEnumDescriptions": [
@@ -117,9 +117,9 @@
             "_OpenAI_ · o4-mini — fast reasoning model",
             "_Google_ · Gemini 2.5 Pro — thinking model for complex tasks",
             "_Google_ · Gemini 2.5 Flash — fast and versatile",
-            "_DeepSeek_ · V3 — fast general-purpose chat model",
-            "_DeepSeek_ · R1 — reasoning model",
-            "_Mistral_ · Large — flagship multilingual model",
+            "_DeepSeek_ · V3.2 — fast general-purpose chat model",
+            "_DeepSeek_ · V3.2 Reasoner — deep reasoning model",
+            "_Mistral_ · Large 3 — flagship multilingual model",
             "_Mistral_ · Codestral — specialized for code"
           ],
           "default": "claude-sonnet-4-6",
