@@ -47,12 +47,12 @@ export const MODELS: Record<string, ModelInfo> = {
   "gemini-2.5-pro": { provider: "google", displayName: "Gemini 2.5 Pro" },
   "gemini-2.5-flash": { provider: "google", displayName: "Gemini 2.5 Flash" },
   // DeepSeek
-  "deepseek-chat": { provider: "deepseek", displayName: "DeepSeek V3" },
-  "deepseek-reasoner": { provider: "deepseek", displayName: "DeepSeek R1" },
+  "deepseek-chat": { provider: "deepseek", displayName: "DeepSeek V3.2" },
+  "deepseek-reasoner": { provider: "deepseek", displayName: "DeepSeek V3.2 Reasoner" },
   // Mistral
   "mistral-large-latest": {
     provider: "mistral",
-    displayName: "Mistral Large",
+    displayName: "Mistral Large 3",
   },
   "codestral-latest": { provider: "mistral", displayName: "Codestral" },
 };
