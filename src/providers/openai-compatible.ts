@@ -38,7 +38,7 @@ export class OpenAICompatibleProvider implements CommitMessageProvider {
             { role: "system", content: SYSTEM_PROMPT },
             { role: "user", content: userMessage },
           ],
-          max_tokens: MAX_TOKENS,
+          max_completion_tokens: MAX_TOKENS,
         }),
       });
 
