@@ -11,6 +11,7 @@ import type { CommitMessageProvider } from "../providers/types";
 import { generateHandler } from "../commands/generate";
 
 type ActionQuickPickItem = vscode.QuickPickItem & { id: string };
+type ModelQuickPickItem = vscode.QuickPickItem & { modelId: string };
 
 describe("generateHandler", () => {
   let mockGitService: IGitService;
@@ -95,15 +96,52 @@ describe("generateHandler", () => {
     expect(mockProviderFactory.create).not.toHaveBeenCalled();
   });
 
-  it("shows error and returns for an unrecognised model ID", async () => {
-    vi.mocked(mockConfigService.getModelId).mockReturnValue("not-a-real-model");
+  describe("when the selected model is no longer available", () => {
+    beforeEach(() => {
+      vi.mocked(mockConfigService.getModelId).mockReturnValue("not-a-real-model");
+    });
 
-    await makeHandler()();
+    it("opens the model quick pick naming the unavailable model", async () => {
+      await makeHandler()();
 
-    expect(mockWindow.showErrorMessage).toHaveBeenCalledWith(
-      expect.stringContaining('Unknown model "not-a-real-model"')
-    );
-    expect(mockProviderFactory.create).not.toHaveBeenCalled();
+      expect(mockWindow.showQuickPick).toHaveBeenCalledOnce();
+      const options = mockWindow.showQuickPick.mock.calls[0][1];
+      expect(options?.placeHolder).toContain("not-a-real-model");
+    });
+
+    it("validates the model before doing any git work", async () => {
+      await makeHandler()();
+
+      expect(mockGitService.getActiveRepository).not.toHaveBeenCalled();
+      expect(mockGitService.getStagedDiff).not.toHaveBeenCalled();
+    });
+
+    it("continues generating with the newly picked model", async () => {
+      mockWindow.showQuickPick.mockResolvedValueOnce({
+        label: "Claude Haiku 4.5",
+        modelId: "claude-haiku-4-5",
+      } as ModelQuickPickItem);
+
+      await makeHandler()();
+
+      expect(mockConfigService.setModelId).toHaveBeenCalledWith("claude-haiku-4-5");
+      expect(mockProviderFactory.create).toHaveBeenCalledWith(
+        "claude-haiku-4-5",
+        "sk-test-key"
+      );
+      expect(mockRepo.setCommitMessage).toHaveBeenCalledWith(
+        "feat: add new feature"
+      );
+    });
+
+    it("returns without generating when the pick is dismissed", async () => {
+      mockWindow.showQuickPick.mockResolvedValueOnce(undefined);
+
+      await makeHandler()();
+
+      expect(mockProviderFactory.create).not.toHaveBeenCalled();
+      expect(mockRepo.setCommitMessage).not.toHaveBeenCalled();
+    });
   });
 
   describe("when no API key is stored", () => {

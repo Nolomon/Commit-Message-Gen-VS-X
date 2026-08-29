@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import { IConfigService, IGitService, IProviderFactory, ISecretStore, SECRET_KEY_PREFIX } from "../core/ports";
 import { getProviderForModel } from "../providers/models";
+import { pickModel } from "./set-model";
 
 export function generateHandler(
   gitService: IGitService,
@@ -10,22 +11,32 @@ export function generateHandler(
 ): () => Promise<void> {
   return async () => {
     try {
+      // Validated before any git work: the lookup is free, and a selected model
+      // that has been retired would otherwise cost a full staged-diff read on
+      // every press before failing.
+      let modelId = configService.getModelId();
+      let info = getProviderForModel(modelId);
+      if (!info) {
+        const picked = await pickModel(
+          configService,
+          `"${modelId}" is no longer available — select a model`
+        );
+        if (!picked) {
+          return;
+        }
+        modelId = picked;
+        info = getProviderForModel(modelId);
+        if (!info) {
+          return;
+        }
+      }
+
       const repo = await gitService.getActiveRepository();
 
       const diff = await gitService.getStagedDiff(repo.rootPath);
       if (!diff.trim()) {
         vscode.window.showWarningMessage(
           "No staged changes found. Stage some changes first."
-        );
-        return;
-      }
-
-      const modelId = configService.getModelId();
-
-      const info = getProviderForModel(modelId);
-      if (!info) {
-        vscode.window.showErrorMessage(
-          `Unknown model "${modelId}". Check your commitMessageGen.model setting.`
         );
         return;
       }
