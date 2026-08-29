@@ -2,6 +2,25 @@
 
 All notable changes will be documented in this file.
 
+## [0.3.0] - 2026-08-29
+
+### Added
+
+- New `commitMessageGen.focusMessageBox` setting to put the cursor in the commit message box once a message is ready (off by default)
+
+### Changed
+
+- Updated to the latest models for Anthropic (Claude Opus 5, Sonnet 5, Haiku 4.5), OpenAI (GPT-5.6 Sol, Terra, Luna), Gemini (3.7 Flash, 3.1 Flash-Lite, 3.1 Pro Preview), DeepSeek (V4 Flash, V4 Pro), and Mistral (Medium 3.5, Codestral)
+- Default model is now Claude Sonnet 5; a retired model is switched to the closest current one automatically
+
+### Fixed
+
+- Fixed generation moving the cursor away from what you were typing in
+- Fixed DeepSeek models failing with an API error on every attempt
+- Fixed generation sometimes finishing with an empty commit message
+- Running out of credit now explains what happened with a link to the provider's billing page, instead of showing raw JSON
+- Other API failures now read as a sentence instead of the raw response body
+
 ## [0.2.0] - 2026-04-07
 
 ### Added
