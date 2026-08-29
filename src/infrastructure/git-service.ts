@@ -1,6 +1,10 @@
 import * as vscode from "vscode";
 import { execFile } from "child_process";
-import { IGitRepository, IGitService } from "../core/ports";
+import {
+  IGitRepository,
+  IGitService,
+  SetCommitMessageOptions,
+} from "../core/ports";
 
 interface GitExtensionAPI {
   getAPI(version: 1): GitAPI;
@@ -24,11 +28,16 @@ export class GitService implements IGitService {
     const repo = await this.findActiveRepository(git);
     return {
       rootPath: repo.rootUri.fsPath,
-      setCommitMessage(message: string) {
+      setCommitMessage(message: string, options?: SetCommitMessageOptions) {
         repo.inputBox.value = message;
-        vscode.commands.executeCommand("workbench.scm.focus").then(() => {
-          vscode.commands.executeCommand("cursorTop");
-        });
+        if (options?.focusInput === false) {
+          return;
+        }
+        // cursorTop applies to whatever holds focus, so it must wait for the
+        // SCM box to actually have it — otherwise it scrolls the user's file.
+        void vscode.commands
+          .executeCommand("workbench.scm.focus")
+          .then(() => vscode.commands.executeCommand("cursorTop"));
       },
     };
   }

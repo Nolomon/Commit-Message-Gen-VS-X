@@ -97,7 +97,12 @@ export function generateHandler(
           }
         );
 
-        repo.setCommitMessage(message);
+        // Taking focus is opt-in: generation is slow enough that the user has
+        // usually moved on, and VS Code exposes no way to tell where focus
+        // actually is (a terminal, another window's editor, a panel).
+        repo.setCommitMessage(message, {
+          focusInput: configService.shouldFocusMessageBox(),
+        });
       } finally {
         provider.dispose();
       }

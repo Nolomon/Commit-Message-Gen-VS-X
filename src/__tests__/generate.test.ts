@@ -52,6 +52,7 @@ describe("generateHandler", () => {
     mockConfigService = {
       getModelId: vi.fn().mockReturnValue("claude-sonnet-5"),
       setModelId: vi.fn().mockResolvedValue(undefined),
+      shouldFocusMessageBox: vi.fn().mockReturnValue(false),
     };
 
     mockProviderFactory = {
@@ -77,7 +78,20 @@ describe("generateHandler", () => {
       "sk-test-key"
     );
     expect(mockProvider.generate).toHaveBeenCalled();
-    expect(mockRepo.setCommitMessage).toHaveBeenCalledWith("feat: add new feature");
+    expect(mockRepo.setCommitMessage).toHaveBeenCalledWith("feat: add new feature", {
+      focusInput: false,
+    });
+  });
+
+  it("focuses the message box when commitMessageGen.focusMessageBox is enabled", async () => {
+    vi.mocked(mockConfigService.shouldFocusMessageBox).mockReturnValue(true);
+
+    await makeHandler()();
+
+    expect(mockRepo.setCommitMessage).toHaveBeenCalledWith(
+      "feat: add new feature",
+      { focusInput: true }
+    );
   });
 
   it("disposes the provider after successful generation", async () => {
@@ -130,7 +144,8 @@ describe("generateHandler", () => {
         "sk-test-key"
       );
       expect(mockRepo.setCommitMessage).toHaveBeenCalledWith(
-        "feat: add new feature"
+        "feat: add new feature",
+        { focusInput: false }
       );
     });
 
@@ -194,7 +209,10 @@ describe("generateHandler", () => {
         "claude-sonnet-5",
         "sk-entered-key"
       );
-      expect(mockRepo.setCommitMessage).toHaveBeenCalledWith("feat: add new feature");
+      expect(mockRepo.setCommitMessage).toHaveBeenCalledWith(
+        "feat: add new feature",
+        { focusInput: false }
+      );
     });
 
     it("returns without generating when user picks setKey but cancels InputBox", async () => {

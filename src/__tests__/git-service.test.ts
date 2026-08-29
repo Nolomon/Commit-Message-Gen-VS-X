@@ -16,6 +16,7 @@ type WritableMockWindow = { activeTextEditor: vscode.TextEditor | undefined };
 const mockExecFile = vi.mocked(execFile);
 const mockExtensions = vi.mocked(vscode.extensions);
 const mockWindow = vi.mocked(vscode.window);
+const mockCommands = vi.mocked(vscode.commands);
 
 describe("GitService", () => {
   let service: GitService;
@@ -177,6 +178,39 @@ describe("GitService", () => {
       result.setCommitMessage("feat: something new");
 
       expect(repo.inputBox.value).toBe("feat: something new");
+    });
+
+    it("setCommitMessage focuses the box and scrolls it to the top by default", async () => {
+      const repo = { rootUri: { fsPath: "/repo" }, inputBox: { value: "" } };
+      mockExtensions.getExtension.mockReturnValue({
+        isActive: true,
+        exports: { getAPI: () => ({ repositories: [repo] }) },
+      } as Partial<MockGitExtension> as MockGitExtension);
+
+      const result = await service.getActiveRepository();
+      result.setCommitMessage("feat: something new");
+      await Promise.resolve();
+
+      expect(mockCommands.executeCommand).toHaveBeenNthCalledWith(
+        1,
+        "workbench.scm.focus"
+      );
+      expect(mockCommands.executeCommand).toHaveBeenNthCalledWith(2, "cursorTop");
+    });
+
+    it("setCommitMessage leaves focus alone when focusInput is false", async () => {
+      const repo = { rootUri: { fsPath: "/repo" }, inputBox: { value: "" } };
+      mockExtensions.getExtension.mockReturnValue({
+        isActive: true,
+        exports: { getAPI: () => ({ repositories: [repo] }) },
+      } as Partial<MockGitExtension> as MockGitExtension);
+
+      const result = await service.getActiveRepository();
+      result.setCommitMessage("feat: something new", { focusInput: false });
+      await Promise.resolve();
+
+      expect(repo.inputBox.value).toBe("feat: something new");
+      expect(mockCommands.executeCommand).not.toHaveBeenCalled();
     });
   });
 

@@ -55,6 +55,23 @@ describe("ConfigService", () => {
     });
   });
 
+  describe("shouldFocusMessageBox", () => {
+    it("returns the configured value", () => {
+      const mockGet = vi.fn().mockReturnValue(true);
+      mockWorkspace.getConfiguration.mockReturnValue(makeConfig({ get: mockGet }));
+
+      expect(service.shouldFocusMessageBox()).toBe(true);
+      expect(mockGet).toHaveBeenCalledWith("focusMessageBox", false);
+    });
+
+    it("defaults to false so generation never steals focus", () => {
+      const mockGet = vi.fn((_key: string, fallback: boolean) => fallback);
+      mockWorkspace.getConfiguration.mockReturnValue(makeConfig({ get: mockGet }));
+
+      expect(service.shouldFocusMessageBox()).toBe(false);
+    });
+  });
+
   describe("setModelId", () => {
     it("calls update with the given model ID and ConfigurationTarget.Global", async () => {
       const mockUpdate = vi.fn().mockResolvedValue(undefined);
