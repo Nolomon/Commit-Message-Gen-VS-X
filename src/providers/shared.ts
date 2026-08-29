@@ -2,7 +2,7 @@ import { USER_PROMPT_TEMPLATE } from "../core/prompt";
 
 export const MAX_DIFF_CHARS = 100_000;
 
-export const MAX_TOKENS = 1024;
+export const MAX_TOKENS = 4096;
 
 const MAX_RETRIES = 3;
 const INITIAL_BACKOFF_MS = 1_000;

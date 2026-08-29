@@ -35,7 +35,7 @@ function createMockDeps(overrides?: {
       ...overrides?.gitService,
     } satisfies IGitService,
     configService: {
-      getModelId: vi.fn().mockReturnValue("claude-sonnet-4-6"),
+      getModelId: vi.fn().mockReturnValue("claude-sonnet-5"),
       setModelId: vi.fn().mockResolvedValue(undefined),
       ...overrides?.configService,
     } satisfies IConfigService,
@@ -68,7 +68,7 @@ describe("generateCommitMessage", () => {
     expect(deps.gitService.getActiveRepository).toHaveBeenCalled();
     expect(deps.gitService.getStagedDiff).toHaveBeenCalledWith("/repo");
     expect(deps.providerFactory.create).toHaveBeenCalledWith(
-      "claude-sonnet-4-6",
+      "claude-sonnet-5",
       "sk-test-key"
     );
     expect(deps.mockProvider.dispose).toHaveBeenCalled();

@@ -19,7 +19,7 @@ describe("ClaudeProvider", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    provider = new ClaudeProvider("test-api-key", "claude-sonnet-4-6");
+    provider = new ClaudeProvider("test-api-key", "claude-sonnet-5");
   });
 
   it('has name "Anthropic Claude"', () => {
@@ -39,12 +39,37 @@ describe("ClaudeProvider", () => {
 
     expect(mockCreate).toHaveBeenCalledOnce();
     const args = mockCreate.mock.calls[0][0];
-    expect(args.model).toBe("claude-sonnet-4-6");
+    expect(args.model).toBe("claude-sonnet-5");
     expect(args.max_tokens).toBe(MAX_TOKENS);
     expect(args.system).toBe(SYSTEM_PROMPT);
     expect(args.messages).toHaveLength(1);
     expect(args.messages[0].role).toBe("user");
     expect(args.messages[0].content).toContain("some diff");
+  });
+
+  it("merges requestOptions into messages.create", async () => {
+    const tuned = new ClaudeProvider("key", "claude-sonnet-5", {
+      output_config: { effort: "low" },
+    });
+    mockCreate.mockResolvedValueOnce({
+      content: [{ type: "text", text: "feat: x" }],
+    });
+
+    await tuned.generate("diff");
+
+    const args = mockCreate.mock.calls[0][0];
+    expect(args.output_config).toEqual({ effort: "low" });
+  });
+
+  it("sends no output_config when requestOptions is omitted", async () => {
+    mockCreate.mockResolvedValueOnce({
+      content: [{ type: "text", text: "feat: x" }],
+    });
+
+    await provider.generate("diff");
+
+    const args = mockCreate.mock.calls[0][0];
+    expect(args.output_config).toBeUndefined();
   });
 
   it("returns text from response", async () => {

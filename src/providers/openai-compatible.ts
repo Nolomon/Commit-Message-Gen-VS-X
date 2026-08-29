@@ -2,7 +2,7 @@ import { SYSTEM_PROMPT } from "../core/prompt";
 import { CommitMessageProvider } from "./types";
 import { stripMarkdownFences, buildUserMessage, withRetry, MAX_TOKENS } from "./shared";
 import { registerProvider } from "./registry";
-import { PROVIDERS } from "./models";
+import { MODELS, ModelRequestOptions, PROVIDERS } from "./models";
 
 export class OpenAICompatibleProvider implements CommitMessageProvider {
   readonly name: string;
@@ -10,19 +10,22 @@ export class OpenAICompatibleProvider implements CommitMessageProvider {
   private model: string;
   private baseUrl: string;
   private tokenParam: string;
+  private requestOptions: ModelRequestOptions;
 
   constructor(
     apiKey: string,
     model: string,
     baseUrl: string,
     name: string,
-    tokenParam: "max_tokens" | "max_completion_tokens" = "max_completion_tokens"
+    tokenParam: "max_tokens" | "max_completion_tokens" = "max_completion_tokens",
+    requestOptions: ModelRequestOptions = {}
   ) {
     this.apiKey = apiKey;
     this.model = model;
     this.baseUrl = baseUrl;
     this.name = name;
     this.tokenParam = tokenParam;
+    this.requestOptions = requestOptions;
   }
 
   async generate(diff: string): Promise<string> {
@@ -36,6 +39,7 @@ export class OpenAICompatibleProvider implements CommitMessageProvider {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          ...this.requestOptions,
           model: this.model,
           messages: [
             { role: "system", content: SYSTEM_PROMPT },
@@ -73,6 +77,13 @@ export class OpenAICompatibleProvider implements CommitMessageProvider {
 for (const providerId of ["openai", "deepseek", "mistral"] as const) {
   const info = PROVIDERS[providerId];
   registerProvider(providerId, (apiKey, modelId) =>
-    new OpenAICompatibleProvider(apiKey, modelId, info.baseUrl!, info.displayName, info.tokenParam)
+    new OpenAICompatibleProvider(
+      apiKey,
+      modelId,
+      info.baseUrl!,
+      info.displayName,
+      info.tokenParam,
+      MODELS[modelId]?.requestOptions
+    )
   );
 }

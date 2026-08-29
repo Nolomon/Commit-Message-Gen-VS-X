@@ -22,7 +22,7 @@ describe("GeminiProvider", () => {
   beforeEach(() => {
     mockFetch = vi.fn();
     vi.stubGlobal("fetch", mockFetch);
-    provider = new GeminiProvider("test-api-key", "gemini-2.0-flash");
+    provider = new GeminiProvider("test-api-key", "gemini-3.7-flash");
   });
 
   it('has name "Google Gemini"', () => {
@@ -41,8 +41,37 @@ describe("GeminiProvider", () => {
     expect(mockFetch).toHaveBeenCalledOnce();
     const url = mockFetch.mock.calls[0][0];
     expect(url).toBe(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=test-api-key"
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.7-flash:generateContent?key=test-api-key"
     );
+  });
+
+  it("merges requestOptions into the request body", async () => {
+    const tuned = new GeminiProvider("key", "gemini-3.7-flash", {
+      generationConfig: { thinkingLevel: "minimal" },
+    });
+    mockFetch.mockResolvedValueOnce(
+      mockResponse({
+        candidates: [{ content: { parts: [{ text: "feat: x" }] } }],
+      })
+    );
+
+    await tuned.generate("diff");
+
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.generationConfig).toEqual({ thinkingLevel: "minimal" });
+  });
+
+  it("sends no generationConfig when requestOptions is omitted", async () => {
+    mockFetch.mockResolvedValueOnce(
+      mockResponse({
+        candidates: [{ content: { parts: [{ text: "feat: x" }] } }],
+      })
+    );
+
+    await provider.generate("diff");
+
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.generationConfig).toBeUndefined();
   });
 
   it("does NOT send Authorization header", async () => {
