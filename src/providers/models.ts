@@ -10,6 +10,8 @@ export interface ProviderInfo {
   baseUrl?: string;
   /** The request body field name for limiting output tokens. */
   tokenParam?: "max_tokens" | "max_completion_tokens";
+  /** Where the user tops up or upgrades, linked from out-of-credit errors. */
+  billingUrl: string;
 }
 
 /** Extra request-body fields merged into the provider call for a given model. */
@@ -29,11 +31,32 @@ export interface ModelInfo {
 export const DEFAULT_MODEL_ID = "claude-sonnet-5";
 
 export const PROVIDERS: Record<ProviderId, ProviderInfo> = {
-  anthropic: { displayName: "Claude" },
-  openai: { displayName: "GPT", baseUrl: "https://api.openai.com/v1", tokenParam: "max_completion_tokens" },
-  google: { displayName: "Gemini" },
-  deepseek: { displayName: "DeepSeek", baseUrl: "https://api.deepseek.com", tokenParam: "max_tokens" },
-  mistral: { displayName: "Mistral", baseUrl: "https://api.mistral.ai/v1", tokenParam: "max_tokens" },
+  anthropic: {
+    displayName: "Claude",
+    billingUrl: "https://console.anthropic.com/settings/billing",
+  },
+  openai: {
+    displayName: "GPT",
+    baseUrl: "https://api.openai.com/v1",
+    tokenParam: "max_completion_tokens",
+    billingUrl: "https://platform.openai.com/settings/organization/billing/overview",
+  },
+  google: {
+    displayName: "Gemini",
+    billingUrl: "https://aistudio.google.com/app/plan_information",
+  },
+  deepseek: {
+    displayName: "DeepSeek",
+    baseUrl: "https://api.deepseek.com",
+    tokenParam: "max_tokens",
+    billingUrl: "https://platform.deepseek.com/top_up",
+  },
+  mistral: {
+    displayName: "Mistral",
+    baseUrl: "https://api.mistral.ai/v1",
+    tokenParam: "max_tokens",
+    billingUrl: "https://console.mistral.ai/billing",
+  },
 };
 
 export const MODELS: Record<string, ModelInfo> = {

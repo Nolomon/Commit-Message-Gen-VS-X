@@ -28,6 +28,11 @@ export const extensions = {
 
 export const Uri = {
   file: (fsPath: string) => ({ fsPath, scheme: "file" }),
+  parse: (value: string) => ({ toString: () => value, scheme: "https" }),
+};
+
+export const env = {
+  openExternal: vi.fn().mockResolvedValue(true),
 };
 
 export const ProgressLocation = { SourceControl: 1 };

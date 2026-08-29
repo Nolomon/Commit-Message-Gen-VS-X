@@ -277,5 +277,89 @@ describe("generateHandler", () => {
         "Failed to generate commit message: string error"
       );
     });
+
+    it("unwraps the provider's message from an API error body", async () => {
+      vi.mocked(mockProvider.generate).mockRejectedValue(
+        new Error(
+          '400 {"type":"error","error":{"type":"invalid_request_error","message":"max_tokens is too large"},"request_id":"req_1"}'
+        )
+      );
+
+      await makeHandler()();
+
+      expect(mockWindow.showErrorMessage).toHaveBeenCalledWith(
+        "Failed to generate commit message: max_tokens is too large"
+      );
+    });
+  });
+
+  describe("when the provider account is out of credit", () => {
+    const creditError = new Error(
+      '400 {"type":"error","error":{"type":"invalid_request_error","message":"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits."},"request_id":"req_011CeXEk4wcMKbRox3UUGAHv"}'
+    );
+
+    beforeEach(() => {
+      vi.mocked(mockProvider.generate).mockRejectedValue(creditError);
+    });
+
+    it("shows the provider's message with a billing button instead of the raw body", async () => {
+      await makeHandler()();
+
+      expect(mockWindow.showErrorMessage).toHaveBeenCalledWith(
+        "Claude: Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.",
+        "Open Claude Billing"
+      );
+      const [shown] = mockWindow.showErrorMessage.mock.calls[0];
+      expect(shown).not.toContain("request_id");
+      expect(shown).not.toContain("invalid_request_error");
+    });
+
+    it("opens the provider's billing page when the button is pressed", async () => {
+      mockWindow.showErrorMessage.mockResolvedValueOnce("Open Claude Billing");
+
+      await makeHandler()();
+
+      expect(vi.mocked(vscode.env).openExternal).toHaveBeenCalledOnce();
+      const [uri] = vi.mocked(vscode.env).openExternal.mock.calls[0];
+      expect(uri.toString()).toBe("https://console.anthropic.com/settings/billing");
+    });
+
+    it("does not open anything when the notification is dismissed", async () => {
+      mockWindow.showErrorMessage.mockResolvedValueOnce(undefined);
+
+      await makeHandler()();
+
+      expect(vi.mocked(vscode.env).openExternal).not.toHaveBeenCalled();
+    });
+
+    it("links the billing page of the provider that actually failed", async () => {
+      vi.mocked(mockConfigService.getModelId).mockReturnValue("deepseek-v4-flash");
+      vi.mocked(mockProvider.generate).mockRejectedValue(
+        new Error(
+          'API request failed (402): {"error":{"message":"Insufficient Balance","type":"unknown_error"}}'
+        )
+      );
+      mockWindow.showErrorMessage.mockResolvedValueOnce("Open DeepSeek Billing");
+
+      await makeHandler()();
+
+      expect(mockWindow.showErrorMessage).toHaveBeenCalledWith(
+        "DeepSeek: Insufficient Balance",
+        "Open DeepSeek Billing"
+      );
+      const [uri] = vi.mocked(vscode.env).openExternal.mock.calls[0];
+      expect(uri.toString()).toBe("https://platform.deepseek.com/top_up");
+    });
+
+    it("falls back to the plain error when it failed before a provider was chosen", async () => {
+      vi.mocked(mockGitService.getStagedDiff).mockRejectedValue(creditError);
+
+      await makeHandler()();
+
+      expect(mockWindow.showErrorMessage).toHaveBeenCalledWith(
+        expect.stringContaining("Failed to generate commit message:")
+      );
+      expect(vi.mocked(vscode.env).openExternal).not.toHaveBeenCalled();
+    });
   });
 });

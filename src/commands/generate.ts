@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import { IConfigService, IGitService, IProviderFactory, ISecretStore, SECRET_KEY_PREFIX } from "../core/ports";
-import { getProviderForModel } from "../providers/models";
+import { getProviderForModel, ProviderInfo } from "../providers/models";
+import { describeApiError, isBillingError } from "../core/api-error";
 import { pickModel } from "./set-model";
 
 export function generateHandler(
@@ -10,6 +11,9 @@ export function generateHandler(
   providerFactory: IProviderFactory
 ): () => Promise<void> {
   return async () => {
+    // Held outside the try so a failed request can be reported against the
+    // provider that rejected it.
+    let providerInfo: ProviderInfo | undefined;
     try {
       // Validated before any git work: the lookup is free, and a selected model
       // that has been retired would otherwise cost a full staged-diff read on
@@ -41,7 +45,8 @@ export function generateHandler(
         return;
       }
 
-      const { providerId, provider: providerInfo } = info;
+      const { providerId } = info;
+      providerInfo = info.provider;
 
       let apiKey = await secretStore.get(SECRET_KEY_PREFIX + providerId);
       if (!apiKey) {
@@ -107,9 +112,22 @@ export function generateHandler(
         provider.dispose();
       }
     } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : String(error);
+      const details = describeApiError(error);
+
+      if (providerInfo && isBillingError(details)) {
+        const openBilling = `Open ${providerInfo.displayName} Billing`;
+        const choice = await vscode.window.showErrorMessage(
+          `${providerInfo.displayName}: ${details.message}`,
+          openBilling
+        );
+        if (choice === openBilling) {
+          await vscode.env.openExternal(vscode.Uri.parse(providerInfo.billingUrl));
+        }
+        return;
+      }
+
       vscode.window.showErrorMessage(
-        `Failed to generate commit message: ${msg}`
+        `Failed to generate commit message: ${details.message}`
       );
     }
   };
