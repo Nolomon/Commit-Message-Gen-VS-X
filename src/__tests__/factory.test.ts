@@ -20,31 +20,31 @@ type ModelLookup = ReturnType<typeof models.getProviderForModel>;
 
 describe("createProvider", () => {
   it("returns ClaudeProvider for anthropic models", () => {
-    const provider = createProvider("claude-sonnet-4-6", "test-key");
+    const provider = createProvider("claude-sonnet-5", "test-key");
     expect(provider).toBeInstanceOf(ClaudeProvider);
     expect(provider.name).toBe("Anthropic Claude");
   });
 
   it("returns GeminiProvider for google models", () => {
-    const provider = createProvider("gemini-2.5-flash", "test-key");
+    const provider = createProvider("gemini-3.7-flash", "test-key");
     expect(provider).toBeInstanceOf(GeminiProvider);
     expect(provider.name).toBe("Google Gemini");
   });
 
   it("returns OpenAICompatibleProvider for openai models", () => {
-    const provider = createProvider("gpt-4.1", "test-key");
+    const provider = createProvider("gpt-5.6-sol", "test-key");
     expect(provider).toBeInstanceOf(OpenAICompatibleProvider);
     expect(provider.name).toBe("GPT");
   });
 
   it("returns OpenAICompatibleProvider for deepseek models", () => {
-    const provider = createProvider("deepseek-chat", "test-key");
+    const provider = createProvider("deepseek-v4-flash", "test-key");
     expect(provider).toBeInstanceOf(OpenAICompatibleProvider);
     expect(provider.name).toBe("DeepSeek");
   });
 
   it("returns OpenAICompatibleProvider for mistral models", () => {
-    const provider = createProvider("mistral-large-latest", "test-key");
+    const provider = createProvider("mistral-medium-latest", "test-key");
     expect(provider).toBeInstanceOf(OpenAICompatibleProvider);
     expect(provider.name).toBe("Mistral");
   });
@@ -73,7 +73,7 @@ describe("createProvider", () => {
     );
     vi.spyOn(registry, "getProviderCreator").mockReturnValueOnce(undefined);
 
-    expect(() => createProvider("claude-sonnet-4-6", "key")).toThrow(
+    expect(() => createProvider("claude-sonnet-5", "key")).toThrow(
       'No provider registered for "anthropic"'
     );
   });
@@ -81,12 +81,12 @@ describe("createProvider", () => {
   it("creates providers for every model in each provider group", () => {
     // Verify at least one model per provider doesn't throw
     const testCases: [string, string][] = [
-      ["claude-opus-4-6", "Anthropic Claude"],
+      ["claude-opus-5", "Anthropic Claude"],
       ["claude-haiku-4-5", "Anthropic Claude"],
-      ["gpt-4.1-mini", "GPT"],
-      ["o4-mini", "GPT"],
-      ["gemini-2.5-pro", "Google Gemini"],
-      ["deepseek-reasoner", "DeepSeek"],
+      ["gpt-5.6-terra", "GPT"],
+      ["gpt-5.6-luna", "GPT"],
+      ["gemini-3.1-pro-preview", "Google Gemini"],
+      ["deepseek-v4-pro", "DeepSeek"],
       ["codestral-latest", "Mistral"],
     ];
     for (const [modelId, expectedName] of testCases) {

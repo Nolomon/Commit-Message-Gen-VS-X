@@ -28,9 +28,9 @@ describe("ProviderFactory", () => {
     const mockProvider = { name: "test", generate: vi.fn(), dispose: vi.fn() };
     mockCreateProvider.mockReturnValue(mockProvider);
 
-    const result = factory.create("claude-sonnet-4-6", "sk-test-key");
+    const result = factory.create("claude-sonnet-5", "sk-test-key");
 
-    expect(mockCreateProvider).toHaveBeenCalledWith("claude-sonnet-4-6", "sk-test-key");
+    expect(mockCreateProvider).toHaveBeenCalledWith("claude-sonnet-5", "sk-test-key");
     expect(result).toBe(mockProvider);
   });
 

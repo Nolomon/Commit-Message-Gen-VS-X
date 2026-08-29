@@ -24,7 +24,7 @@ describe("OpenAICompatibleProvider", () => {
     vi.stubGlobal("fetch", mockFetch);
     provider = new OpenAICompatibleProvider(
       "test-api-key",
-      "gpt-4.1",
+      "gpt-5.6-sol",
       "https://api.openai.com/v1",
       "GPT"
     );
@@ -77,7 +77,7 @@ describe("OpenAICompatibleProvider", () => {
     await provider.generate("my diff content");
 
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
-    expect(body.model).toBe("gpt-4.1");
+    expect(body.model).toBe("gpt-5.6-sol");
     expect(body.max_completion_tokens).toBe(MAX_TOKENS);
     expect(body.max_tokens).toBeUndefined();
     expect(body.messages).toHaveLength(2);
@@ -198,7 +198,7 @@ describe("OpenAICompatibleProvider", () => {
   it("uses max_tokens when configured", async () => {
     const mistralProvider = new OpenAICompatibleProvider(
       "key",
-      "mistral-large-latest",
+      "mistral-medium-latest",
       "https://api.mistral.ai/v1",
       "Mistral",
       "max_tokens"
@@ -217,7 +217,7 @@ describe("OpenAICompatibleProvider", () => {
   it("works with different base URLs", async () => {
     const deepseekProvider = new OpenAICompatibleProvider(
       "key",
-      "deepseek-chat",
+      "deepseek-v4-flash",
       "https://api.deepseek.com",
       "DeepSeek"
     );
@@ -230,6 +230,60 @@ describe("OpenAICompatibleProvider", () => {
     expect(mockFetch.mock.calls[0][0]).toBe(
       "https://api.deepseek.com/chat/completions"
     );
+  });
+
+  it("merges requestOptions into the request body", async () => {
+    const deepseekProvider = new OpenAICompatibleProvider(
+      "key",
+      "deepseek-v4-flash",
+      "https://api.deepseek.com",
+      "DeepSeek",
+      "max_tokens",
+      { thinking: { type: "disabled" } }
+    );
+    mockFetch.mockResolvedValueOnce(
+      mockResponse({ choices: [{ message: { content: "fix: thing" } }] })
+    );
+
+    await deepseekProvider.generate("diff");
+
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.thinking).toEqual({ type: "disabled" });
+  });
+
+  it("sends no extra fields when requestOptions is omitted", async () => {
+    mockFetch.mockResolvedValueOnce(
+      mockResponse({ choices: [{ message: { content: "feat: x" } }] })
+    );
+
+    await provider.generate("diff");
+
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(Object.keys(body).sort()).toEqual([
+      "max_completion_tokens",
+      "messages",
+      "model",
+    ]);
+  });
+
+  it("requestOptions cannot override model or the token param", async () => {
+    const overriding = new OpenAICompatibleProvider(
+      "key",
+      "gpt-5.6-luna",
+      "https://api.openai.com/v1",
+      "GPT",
+      "max_completion_tokens",
+      { model: "hijacked", max_completion_tokens: 1 }
+    );
+    mockFetch.mockResolvedValueOnce(
+      mockResponse({ choices: [{ message: { content: "feat: x" } }] })
+    );
+
+    await overriding.generate("diff");
+
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.model).toBe("gpt-5.6-luna");
+    expect(body.max_completion_tokens).toBe(MAX_TOKENS);
   });
 
   it("dispose does not throw", () => {

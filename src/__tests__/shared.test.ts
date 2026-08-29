@@ -375,7 +375,7 @@ describe("constants", () => {
     expect(MAX_DIFF_CHARS).toBe(100_000);
   });
 
-  it("MAX_TOKENS equals 1024", () => {
-    expect(MAX_TOKENS).toBe(1024);
+  it("MAX_TOKENS equals 4096", () => {
+    expect(MAX_TOKENS).toBe(4096);
   });
 });

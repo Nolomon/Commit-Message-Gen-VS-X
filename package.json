@@ -81,48 +81,51 @@
         "commitMessageGen.model": {
           "type": "string",
           "enum": [
-            "claude-sonnet-4-6",
-            "claude-opus-4-6",
+            "claude-opus-5",
+            "claude-sonnet-5",
             "claude-haiku-4-5",
-            "gpt-4.1",
-            "gpt-4.1-mini",
-            "o4-mini",
-            "gemini-2.5-pro",
-            "gemini-2.5-flash",
-            "deepseek-chat",
-            "deepseek-reasoner",
-            "mistral-large-latest",
+            "gpt-5.6-sol",
+            "gpt-5.6-terra",
+            "gpt-5.6-luna",
+            "gemini-3.7-flash",
+            "gemini-3.1-flash-lite",
+            "gemini-3.1-pro-preview",
+            "deepseek-v4-flash",
+            "deepseek-v4-pro",
+            "mistral-medium-latest",
             "codestral-latest"
           ],
           "enumItemLabels": [
-            "Claude — Sonnet 4.6",
-            "Claude — Opus 4.6",
+            "Claude — Opus 5",
+            "Claude — Sonnet 5",
             "Claude — Haiku 4.5",
-            "GPT — 4.1",
-            "GPT — 4.1 Mini",
-            "GPT — o4-mini",
-            "Gemini — 2.5 Pro",
-            "Gemini — 2.5 Flash",
-            "DeepSeek — V3.2",
-            "DeepSeek — V3.2 Reasoner",
-            "Mistral — Large 3",
+            "GPT — 5.6 Sol",
+            "GPT — 5.6 Terra",
+            "GPT — 5.6 Luna",
+            "Gemini — 3.7 Flash",
+            "Gemini — 3.1 Flash-Lite",
+            "Gemini — 3.1 Pro (Preview)",
+            "DeepSeek — V4 Flash",
+            "DeepSeek — V4 Pro",
+            "Mistral — Medium 3.5",
             "Mistral — Codestral"
           ],
           "markdownEnumDescriptions": [
-            "_Anthropic_ · Claude Sonnet 4.6 — fast, balanced all-rounder",
-            "_Anthropic_ · Claude Opus 4.6 — most capable Claude model",
+            "_Anthropic_ · Claude Opus 5 — most capable Claude model",
+            "_Anthropic_ · Claude Sonnet 5 — fast, balanced all-rounder",
             "_Anthropic_ · Claude Haiku 4.5 — lightweight and fast",
-            "_OpenAI_ · GPT-4.1 — coding-focused flagship with 1M context",
-            "_OpenAI_ · GPT-4.1 Mini — efficient and affordable",
-            "_OpenAI_ · o4-mini — fast reasoning model",
-            "_Google_ · Gemini 2.5 Pro — thinking model for complex tasks",
-            "_Google_ · Gemini 2.5 Flash — fast and versatile",
-            "_DeepSeek_ · V3.2 — fast general-purpose chat model",
-            "_DeepSeek_ · V3.2 Reasoner — deep reasoning model",
-            "_Mistral_ · Large 3 — flagship multilingual model",
+            "_OpenAI_ · GPT-5.6 Sol — flagship for complex work",
+            "_OpenAI_ · GPT-5.6 Terra — balances intelligence and cost",
+            "_OpenAI_ · GPT-5.6 Luna — fastest and most affordable",
+            "_Google_ · Gemini 3.7 Flash — fast and versatile",
+            "_Google_ · Gemini 3.1 Flash-Lite — cheapest and lowest latency",
+            "_Google_ · Gemini 3.1 Pro — advanced reasoning. **Preview** — Google may retire it at short notice",
+            "_DeepSeek_ · V4 Flash — fast general-purpose chat model",
+            "_DeepSeek_ · V4 Pro — stronger reasoning, 3× the cost of Flash",
+            "_Mistral_ · Medium 3.5 — flagship multimodal model",
             "_Mistral_ · Codestral — specialized for code"
           ],
-          "default": "claude-sonnet-4-6",
+          "default": "claude-sonnet-5",
           "description": "AI model to use for commit message generation. The provider is determined automatically from the selected model."
         }
       }
@@ -146,6 +149,6 @@
     "vitest": "^4.0.18"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.82.0"
+    "@anthropic-ai/sdk": "^0.122.0"
   }
 }

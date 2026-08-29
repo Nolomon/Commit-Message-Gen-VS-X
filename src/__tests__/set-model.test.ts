@@ -13,7 +13,7 @@ describe("setModelHandler", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockConfigService = {
-      getModelId: vi.fn().mockReturnValue("claude-sonnet-4-6"),
+      getModelId: vi.fn().mockReturnValue("claude-sonnet-5"),
       setModelId: vi.fn().mockResolvedValue(undefined),
     };
   });
@@ -43,27 +43,27 @@ describe("setModelHandler", () => {
   });
 
   it("marks the current model with $(check) in the description", async () => {
-    vi.mocked(mockConfigService.getModelId).mockReturnValue("claude-sonnet-4-6");
+    vi.mocked(mockConfigService.getModelId).mockReturnValue("claude-sonnet-5");
     mockWindow.showQuickPick.mockResolvedValueOnce(undefined);
 
     await makeHandler()();
 
     const items = mockWindow.showQuickPick.mock.calls[0][0] as ModelQuickPickItem[];
     const currentItem = items.find(
-      (i) => i.modelId === "claude-sonnet-4-6"
+      (i) => i.modelId === "claude-sonnet-5"
     );
     expect(currentItem?.description).toContain("$(check)");
   });
 
   it("does not add $(check) to non-current models", async () => {
-    vi.mocked(mockConfigService.getModelId).mockReturnValue("claude-sonnet-4-6");
+    vi.mocked(mockConfigService.getModelId).mockReturnValue("claude-sonnet-5");
     mockWindow.showQuickPick.mockResolvedValueOnce(undefined);
 
     await makeHandler()();
 
     const items = mockWindow.showQuickPick.mock.calls[0][0] as ModelQuickPickItem[];
     const otherItems = items.filter(
-      (i) => i.modelId !== "claude-sonnet-4-6"
+      (i) => i.modelId !== "claude-sonnet-5"
     );
     for (const item of otherItems) {
       expect(item.description).not.toContain("$(check)");
@@ -81,8 +81,8 @@ describe("setModelHandler", () => {
 
   it("returns without updating when user picks the already-active model", async () => {
     const picked: ModelQuickPickItem = {
-      modelId: "claude-sonnet-4-6",
-      label: MODELS["claude-sonnet-4-6"].displayName,
+      modelId: "claude-sonnet-5",
+      label: MODELS["claude-sonnet-5"].displayName,
     };
     mockWindow.showQuickPick.mockResolvedValueOnce(picked);
 
@@ -93,16 +93,16 @@ describe("setModelHandler", () => {
 
   it("calls setModelId and shows confirmation when user picks a different model", async () => {
     const picked: ModelQuickPickItem = {
-      modelId: "gpt-4.1",
-      label: MODELS["gpt-4.1"].displayName,
+      modelId: "gpt-5.6-sol",
+      label: MODELS["gpt-5.6-sol"].displayName,
     };
     mockWindow.showQuickPick.mockResolvedValueOnce(picked);
 
     await makeHandler()();
 
-    expect(mockConfigService.setModelId).toHaveBeenCalledWith("gpt-4.1");
+    expect(mockConfigService.setModelId).toHaveBeenCalledWith("gpt-5.6-sol");
     expect(mockWindow.showInformationMessage).toHaveBeenCalledWith(
-      `Model set to ${MODELS["gpt-4.1"].displayName}.`
+      `Model set to ${MODELS["gpt-5.6-sol"].displayName}.`
     );
   });
 });

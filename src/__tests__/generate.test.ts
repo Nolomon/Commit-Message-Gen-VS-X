@@ -49,7 +49,7 @@ describe("generateHandler", () => {
     };
 
     mockConfigService = {
-      getModelId: vi.fn().mockReturnValue("claude-sonnet-4-6"),
+      getModelId: vi.fn().mockReturnValue("claude-sonnet-5"),
       setModelId: vi.fn().mockResolvedValue(undefined),
     };
 
@@ -72,7 +72,7 @@ describe("generateHandler", () => {
 
     expect(mockGitService.getStagedDiff).toHaveBeenCalledWith("/test/repo");
     expect(mockProviderFactory.create).toHaveBeenCalledWith(
-      "claude-sonnet-4-6",
+      "claude-sonnet-5",
       "sk-test-key"
     );
     expect(mockProvider.generate).toHaveBeenCalled();
@@ -153,7 +153,7 @@ describe("generateHandler", () => {
         "sk-entered-key"
       );
       expect(mockProviderFactory.create).toHaveBeenCalledWith(
-        "claude-sonnet-4-6",
+        "claude-sonnet-5",
         "sk-entered-key"
       );
       expect(mockRepo.setCommitMessage).toHaveBeenCalledWith("feat: add new feature");

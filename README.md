@@ -32,11 +32,11 @@ Use the commit message generator with models from Anthropic, OpenAI, Google, Dee
 
 | Provider | Models |
 | -------- | ------ |
-| **Claude** (Anthropic) | Sonnet 4.6, Opus 4.6, Haiku 4.5 |
-| **GPT** (OpenAI) | GPT-4.1, GPT-4.1 Mini, o4-mini |
-| **Gemini** (Google) | 2.5 Pro, 2.5 Flash |
-| **DeepSeek** | V3.2, V3.2 Reasoner |
-| **Mistral** | Large 3, Codestral |
+| **Claude** (Anthropic) | Opus 5, Sonnet 5, Haiku 4.5 |
+| **GPT** (OpenAI) | GPT-5.6 Sol, GPT-5.6 Terra, GPT-5.6 Luna |
+| **Gemini** (Google) | 3.7 Flash, 3.1 Flash-Lite, 3.1 Pro (Preview) |
+| **DeepSeek** | V4 Flash, V4 Pro |
+| **Mistral** | Medium 3.5, Codestral |
 
 ## VS Code Commands
 
