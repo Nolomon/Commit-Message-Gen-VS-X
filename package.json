@@ -127,6 +127,11 @@
           ],
           "default": "claude-sonnet-5",
           "description": "AI model to use for commit message generation. The provider is determined automatically from the selected model."
+        },
+        "commitMessageGen.focusMessageBox": {
+          "type": "boolean",
+          "default": false,
+          "description": "Move the cursor into the commit message box once a message has been generated, and scroll a long message back to its first line. Off by default, so generation never interrupts what you are typing elsewhere — the trade-off is that a message taller than the box stays scrolled to its last line until you click into it. Turning this on takes focus whenever a message is ready, including mid-keystroke if you have moved on to something else."
         }
       }
     }

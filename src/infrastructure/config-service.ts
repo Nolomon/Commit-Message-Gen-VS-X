@@ -11,6 +11,12 @@ export class ConfigService implements IConfigService {
       .get<string>("model", DEFAULT_MODEL_ID);
   }
 
+  shouldFocusMessageBox(): boolean {
+    return vscode.workspace
+      .getConfiguration(SECTION)
+      .get<boolean>("focusMessageBox", false);
+  }
+
   async setModelId(modelId: string): Promise<void> {
     await vscode.workspace
       .getConfiguration(SECTION)

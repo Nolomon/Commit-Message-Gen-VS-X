@@ -7,6 +7,7 @@ function mockConfigService(modelId: string): IConfigService {
   return {
     getModelId: vi.fn(() => modelId),
     setModelId: vi.fn(() => Promise.resolve()),
+    shouldFocusMessageBox: vi.fn(() => false),
   };
 }
 
