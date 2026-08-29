@@ -1,4 +1,5 @@
 import { USER_PROMPT_TEMPLATE } from "../core/prompt";
+import { describeApiError, isBillingError } from "../core/api-error";
 
 export const MAX_DIFF_CHARS = 100_000;
 
@@ -112,6 +113,12 @@ export function buildUserMessage(diff: string): string {
 }
 
 function isTransientError(error: unknown): boolean {
+  // An exhausted balance can look transient — OpenAI reports it as a 429 — but
+  // no amount of backoff clears it. Failing fast gets the user the billing link
+  // instead of fifteen seconds of progress bar first.
+  if (isBillingError(describeApiError(error))) {
+    return false;
+  }
   if (error instanceof Error) {
     const msg = error.message;
     if (/\b(529|overloaded)\b/i.test(msg)) {

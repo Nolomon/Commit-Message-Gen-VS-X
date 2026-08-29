@@ -349,6 +349,19 @@ describe("withRetry", () => {
     expect(fn).toHaveBeenCalledTimes(2);
   });
 
+  it("does not retry an out-of-credit error reported as a 429", async () => {
+    const error = Object.assign(
+      new Error(
+        'API request failed (429): {"error":{"message":"You exceeded your current quota.","code":"insufficient_quota"}}'
+      ),
+      { status: 429 }
+    );
+    const fn = vi.fn().mockRejectedValue(error);
+
+    await expect(withRetry(fn, "diff")).rejects.toThrow("insufficient_quota");
+    expect(fn).toHaveBeenCalledOnce();
+  });
+
   it("does not retry non-transient errors", async () => {
     const fn = vi.fn().mockRejectedValue(new Error("Invalid API key"));
 
