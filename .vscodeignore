@@ -7,3 +7,5 @@ tsconfig.json
 esbuild.js
 **/*.ts
 **/*.map
+AGENTS.md
+.claude/**
