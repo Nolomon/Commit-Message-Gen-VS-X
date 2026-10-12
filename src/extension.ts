@@ -3,11 +3,14 @@ import { ConfigService } from "./infrastructure/config-service";
 import { SecretStore } from "./infrastructure/secret-store";
 import { ProviderFactory } from "./infrastructure/provider-factory";
 import { GitService } from "./infrastructure/git-service";
+import { DraftFiles } from "./infrastructure/draft-files";
+import { DraftUi } from "./infrastructure/draft-ui";
 import { setApiKeyHandler } from "./commands/set-api-key";
 import { clearApiKeyHandler } from "./commands/clear-api-key";
 import { setModelHandler } from "./commands/set-model";
 import { generateHandler } from "./commands/generate";
 import { migrateModelSetting } from "./core/migrate-model-setting";
+import { CommitDraftService } from "./core/commit-draft";
 
 export function activate(context: vscode.ExtensionContext) {
   const configService = new ConfigService();
@@ -35,6 +38,15 @@ export function activate(context: vscode.ExtensionContext) {
       vscode.commands.registerCommand(id, handler)
     );
   }
+
+  const commitDrafts = new CommitDraftService({
+    repositories: gitService,
+    files: new DraftFiles(),
+    ui: new DraftUi(),
+    config: configService,
+  });
+  commitDrafts.start();
+  context.subscriptions.push(commitDrafts);
 }
 
 export function deactivate() {

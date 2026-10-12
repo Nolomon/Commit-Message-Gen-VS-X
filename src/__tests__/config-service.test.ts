@@ -72,6 +72,58 @@ describe("ConfigService", () => {
     });
   });
 
+  describe("isDraftFileEnabled", () => {
+    it("returns the configured value", () => {
+      const mockGet = vi.fn().mockReturnValue(false);
+      mockWorkspace.getConfiguration.mockReturnValue(makeConfig({ get: mockGet }));
+
+      expect(service.isDraftFileEnabled()).toBe(false);
+      expect(mockWorkspace.getConfiguration).toHaveBeenCalledWith("commitMessageGen");
+      expect(mockGet).toHaveBeenCalledWith("draftFile.enabled", true);
+    });
+
+    it("defaults to on", () => {
+      const mockGet = vi.fn((_key: string, fallback: boolean) => fallback);
+      mockWorkspace.getConfiguration.mockReturnValue(makeConfig({ get: mockGet }));
+
+      expect(service.isDraftFileEnabled()).toBe(true);
+    });
+  });
+
+  describe("onDidChangeDraftFileEnabled", () => {
+    function fireConfigurationChange(affected: string) {
+      const handler = mockWorkspace.onDidChangeConfiguration.mock.calls[0][0];
+      handler({
+        affectsConfiguration: (section: string) => section === affected,
+      } as vscode.ConfigurationChangeEvent);
+    }
+
+    it("calls the listener when the setting changes", () => {
+      const listener = vi.fn();
+      service.onDidChangeDraftFileEnabled(listener);
+
+      fireConfigurationChange("commitMessageGen.draftFile.enabled");
+
+      expect(listener).toHaveBeenCalledTimes(1);
+    });
+
+    it("ignores changes to other settings", () => {
+      const listener = vi.fn();
+      service.onDidChangeDraftFileEnabled(listener);
+
+      fireConfigurationChange("commitMessageGen.model");
+
+      expect(listener).not.toHaveBeenCalled();
+    });
+
+    it("returns the subscription so it can be disposed", () => {
+      const subscription = { dispose: vi.fn() };
+      mockWorkspace.onDidChangeConfiguration.mockReturnValueOnce(subscription);
+
+      expect(service.onDidChangeDraftFileEnabled(vi.fn())).toBe(subscription);
+    });
+  });
+
   describe("setModelId", () => {
     it("calls update with the given model ID and ConfigurationTarget.Global", async () => {
       const mockUpdate = vi.fn().mockResolvedValue(undefined);
