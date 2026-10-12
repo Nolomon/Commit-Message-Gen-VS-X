@@ -9,3 +9,4 @@ esbuild.js
 **/*.map
 AGENTS.md
 .claude/**
+resources/icon.svg
