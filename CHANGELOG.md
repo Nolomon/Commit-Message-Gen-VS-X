@@ -2,6 +2,17 @@
 
 All notable changes will be documented in this file.
 
+## [1.0.0] - 2026-10-12
+
+### Added
+
+- Your coding agent can now put its commit message straight into the Source Control message box, with no API key (one-time setup in the README)
+- New `commitMessageGen.draftFile.enabled` setting to turn that off (on by default)
+
+### Changed
+
+- New extension logo
+
 ## [0.3.0] - 2026-08-29
 
 ### Added
