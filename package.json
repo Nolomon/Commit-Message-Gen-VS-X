@@ -1,7 +1,7 @@
 {
   "name": "ai-commit-message-gen",
   "displayName": "AI Commit Message Gen",
-  "description": "Generate AI Git commit messages in VS Code using Conventional Commits. Supports OpenAI, Claude, Gemini, DeepSeek, and Mistral.",
+  "description": "Generate AI Git commit messages in VS Code using Conventional Commits. Supports OpenAI, Claude, Gemini, DeepSeek, and Mistral. Also takes commit messages from your coding agent.",
   "version": "0.3.0",
   "publisher": "Nolomon",
   "license": "MIT",
@@ -33,7 +33,11 @@
     "gemini",
     "deepseek",
     "mistral",
-    "conventional-commits"
+    "conventional-commits",
+    "coding-agent",
+    "ai-agent",
+    "claude-code",
+    "cursor"
   ],
   "activationEvents": [
     "onStartupFinished"
@@ -132,6 +136,11 @@
           "type": "boolean",
           "default": false,
           "description": "Move the cursor into the commit message box once a message has been generated, and scroll a long message back to its first line. Off by default, so generation never interrupts what you are typing elsewhere — the trade-off is that a message taller than the box stays scrolled to its last line until you click into it. Turning this on takes focus whenever a message is ready, including mid-keystroke if you have moved on to something else."
+        },
+        "commitMessageGen.draftFile.enabled": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Let a coding agent or other tool hand over a commit message by writing a `COMMIT_MSG_DRAFT` file into the repository's git directory. The extension moves the text into the commit message box and deletes the file. It never commits, and never replaces a message you have typed without asking. Takes effect immediately; see the README for how to set up your coding agent."
         }
       }
     }

@@ -15,12 +15,28 @@ export const commands = {
   executeCommand: vi.fn().mockResolvedValue(undefined),
 };
 
+const makeDisposable = () => ({ dispose: vi.fn() });
+
 export const workspace = {
   getConfiguration: vi.fn(() => ({
     get: vi.fn(),
     update: vi.fn(),
   })),
+  onDidChangeConfiguration: vi.fn((_listener: Function) => makeDisposable()),
+  createFileSystemWatcher: vi.fn(() => ({
+    onDidCreate: vi.fn((_listener: Function) => makeDisposable()),
+    onDidChange: vi.fn((_listener: Function) => makeDisposable()),
+    onDidDelete: vi.fn((_listener: Function) => makeDisposable()),
+    dispose: vi.fn(),
+  })),
 };
+
+export class RelativePattern {
+  constructor(
+    public base: { fsPath: string },
+    public pattern: string
+  ) {}
+}
 
 export const extensions = {
   getExtension: vi.fn(),

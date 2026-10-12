@@ -7,11 +7,60 @@ vi.mock("child_process", () => ({
 }));
 
 import { GitService } from "../infrastructure/git-service";
+import type { IOpenRepository, RepositoryListener } from "../core/ports";
 
 type MockGitExtension = vscode.Extension<{ getAPI: (version: 1) => { repositories: Repository[] } }>;
 type Repository = { rootUri: { fsPath: string }; inputBox: { value: string } };
 type RepoPickItem = { label: string; repo: Repository };
 type WritableMockWindow = { activeTextEditor: vscode.TextEditor | undefined };
+type RepositoryEventListener = (repo: Repository) => void;
+type ExecFileCallback = (error: (Error & { code?: number }) | null, stdout: string, stderr: string) => void;
+
+/** A git extension whose open/close events the test can fire. */
+function makeTrackableGit(repositories: Repository[] = []) {
+  const openListeners = new Set<RepositoryEventListener>();
+  const closeListeners = new Set<RepositoryEventListener>();
+  const subscribe = (listeners: Set<RepositoryEventListener>) =>
+    vi.fn((listener: RepositoryEventListener) => {
+      listeners.add(listener);
+      return { dispose: () => listeners.delete(listener) };
+    });
+  const api = {
+    repositories,
+    onDidOpenRepository: subscribe(openListeners),
+    onDidCloseRepository: subscribe(closeListeners),
+  };
+  return {
+    extension: {
+      isActive: true,
+      exports: { getAPI: () => api },
+    } as Partial<MockGitExtension> as MockGitExtension,
+    fireOpen: (repo: Repository) => openListeners.forEach((listener) => listener(repo)),
+    fireClose: (repo: Repository) => closeListeners.forEach((listener) => listener(repo)),
+    listenerCount: () => openListeners.size + closeListeners.size,
+  };
+}
+
+function makeListener() {
+  const opened: IOpenRepository[] = [];
+  const listener: RepositoryListener = {
+    opened: vi.fn((repo: IOpenRepository) => {
+      opened.push(repo);
+    }),
+    closed: vi.fn(),
+  };
+  return { listener, opened };
+}
+
+function mockGit(respond: (args: string[], callback: ExecFileCallback) => void) {
+  mockExecFile.mockImplementation(
+    ((_cmd: string, args: string[], _opts: object, callback: ExecFileCallback) => {
+      respond(args, callback);
+    }) as unknown as typeof execFile
+  );
+}
+
+const flush = () => new Promise<void>((resolve) => setImmediate(resolve));
 
 const mockExecFile = vi.mocked(execFile);
 const mockExtensions = vi.mocked(vscode.extensions);
@@ -211,6 +260,198 @@ describe("GitService", () => {
 
       expect(repo.inputBox.value).toBe("feat: something new");
       expect(mockCommands.executeCommand).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("trackRepositories", () => {
+    it("reports the repositories that are already open", async () => {
+      const git = makeTrackableGit([
+        { rootUri: { fsPath: "/one" }, inputBox: { value: "" } },
+        { rootUri: { fsPath: "/two" }, inputBox: { value: "" } },
+      ]);
+      mockExtensions.getExtension.mockReturnValue(git.extension);
+      const { listener, opened } = makeListener();
+
+      service.trackRepositories(listener);
+      await flush();
+
+      expect(opened.map((repo) => repo.rootPath)).toEqual(["/one", "/two"]);
+    });
+
+    it("reports repositories as the git extension opens and closes them", async () => {
+      const git = makeTrackableGit();
+      mockExtensions.getExtension.mockReturnValue(git.extension);
+      const { listener, opened } = makeListener();
+      service.trackRepositories(listener);
+      await flush();
+      const repo = { rootUri: { fsPath: "/later" }, inputBox: { value: "" } };
+
+      git.fireOpen(repo);
+      git.fireClose(repo);
+
+      expect(opened.map((r) => r.rootPath)).toEqual(["/later"]);
+      expect(listener.closed).toHaveBeenCalledWith("/later");
+    });
+
+    it("stops reporting once disposed", async () => {
+      const git = makeTrackableGit();
+      mockExtensions.getExtension.mockReturnValue(git.extension);
+      const { listener } = makeListener();
+      const tracking = service.trackRepositories(listener);
+      await flush();
+
+      tracking.dispose();
+      git.fireOpen({ rootUri: { fsPath: "/later" }, inputBox: { value: "" } });
+
+      expect(git.listenerCount()).toBe(0);
+      expect(listener.opened).not.toHaveBeenCalled();
+    });
+
+    it("reports nothing when disposed before the git extension is ready", async () => {
+      const git = makeTrackableGit([{ rootUri: { fsPath: "/one" }, inputBox: { value: "" } }]);
+      mockExtensions.getExtension.mockReturnValue(git.extension);
+      const { listener } = makeListener();
+
+      service.trackRepositories(listener).dispose();
+      await flush();
+
+      expect(listener.opened).not.toHaveBeenCalled();
+      expect(git.listenerCount()).toBe(0);
+    });
+
+    it("stays quiet when the git extension is missing", async () => {
+      mockExtensions.getExtension.mockReturnValue(undefined);
+      const { listener } = makeListener();
+
+      expect(() => service.trackRepositories(listener)).not.toThrow();
+      await flush();
+
+      expect(listener.opened).not.toHaveBeenCalled();
+    });
+
+    it("stays quiet when git is disabled and the API is unavailable", async () => {
+      mockExtensions.getExtension.mockReturnValue({
+        isActive: true,
+        exports: {
+          getAPI: () => {
+            throw new Error("Git model not found");
+          },
+        },
+      } as Partial<MockGitExtension> as MockGitExtension);
+      const { listener } = makeListener();
+
+      service.trackRepositories(listener);
+      await flush();
+
+      expect(listener.opened).not.toHaveBeenCalled();
+    });
+
+    describe("a tracked repository", () => {
+      async function track(repo: Repository): Promise<IOpenRepository> {
+        mockExtensions.getExtension.mockReturnValue(makeTrackableGit([repo]).extension);
+        const { listener, opened } = makeListener();
+        service.trackRepositories(listener);
+        await flush();
+        return opened[0];
+      }
+
+      it("reads the message box live", async () => {
+        const repo = { rootUri: { fsPath: "/repo" }, inputBox: { value: "" } };
+        const tracked = await track(repo);
+
+        repo.inputBox.value = "fix: typed by the user";
+
+        expect(tracked.getCommitMessage()).toBe("fix: typed by the user");
+      });
+
+      it("writes the message box without touching focus when asked not to", async () => {
+        const repo = { rootUri: { fsPath: "/repo" }, inputBox: { value: "" } };
+        const tracked = await track(repo);
+
+        tracked.setCommitMessage("feat: from a draft", { focusInput: false });
+        await Promise.resolve();
+
+        expect(repo.inputBox.value).toBe("feat: from a draft");
+        expect(mockCommands.executeCommand).not.toHaveBeenCalled();
+      });
+
+      it("focuses the box like generation does when asked to", async () => {
+        const tracked = await track({ rootUri: { fsPath: "/repo" }, inputBox: { value: "" } });
+
+        tracked.setCommitMessage("feat: from a draft", { focusInput: true });
+        await Promise.resolve();
+
+        expect(mockCommands.executeCommand).toHaveBeenNthCalledWith(1, "workbench.scm.focus");
+        expect(mockCommands.executeCommand).toHaveBeenNthCalledWith(2, "cursorTop");
+      });
+
+      it("has staged changes when git diff --cached --quiet exits with 1", async () => {
+        const tracked = await track({ rootUri: { fsPath: "/repo" }, inputBox: { value: "" } });
+        mockGit((_args, callback) =>
+          callback(Object.assign(new Error("exit 1"), { code: 1 }), "", "")
+        );
+
+        await expect(tracked.hasStagedChanges()).resolves.toBe(true);
+        expect(mockExecFile).toHaveBeenCalledWith(
+          "git",
+          ["diff", "--cached", "--quiet"],
+          { cwd: "/repo" },
+          expect.any(Function)
+        );
+      });
+
+      it("has no staged changes when git diff --cached --quiet exits with 0", async () => {
+        const tracked = await track({ rootUri: { fsPath: "/repo" }, inputBox: { value: "" } });
+        mockGit((_args, callback) => callback(null, "", ""));
+
+        await expect(tracked.hasStagedChanges()).resolves.toBe(false);
+      });
+
+      it("reports no staged changes when git itself fails", async () => {
+        const tracked = await track({ rootUri: { fsPath: "/repo" }, inputBox: { value: "" } });
+        mockGit((_args, callback) =>
+          callback(Object.assign(new Error("fatal"), { code: 128 }), "", "fatal: not a repo")
+        );
+
+        await expect(tracked.hasStagedChanges()).resolves.toBe(false);
+      });
+
+      it("resolves a git path against the repository root", async () => {
+        const tracked = await track({ rootUri: { fsPath: "/repo" }, inputBox: { value: "" } });
+        mockGit((_args, callback) => callback(null, ".git/COMMIT_MSG_DRAFT\n", ""));
+
+        await expect(tracked.resolveGitPath("COMMIT_MSG_DRAFT")).resolves.toBe(
+          "/repo/.git/COMMIT_MSG_DRAFT"
+        );
+        expect(mockExecFile).toHaveBeenCalledWith(
+          "git",
+          ["rev-parse", "--git-path", "COMMIT_MSG_DRAFT"],
+          { cwd: "/repo" },
+          expect.any(Function)
+        );
+      });
+
+      it("keeps the absolute git path a linked worktree reports", async () => {
+        const tracked = await track({ rootUri: { fsPath: "/worktree" }, inputBox: { value: "" } });
+        mockGit((_args, callback) =>
+          callback(null, "/main/.git/worktrees/worktree/COMMIT_MSG_DRAFT\n", "")
+        );
+
+        await expect(tracked.resolveGitPath("COMMIT_MSG_DRAFT")).resolves.toBe(
+          "/main/.git/worktrees/worktree/COMMIT_MSG_DRAFT"
+        );
+      });
+
+      it("rejects when git cannot resolve the path", async () => {
+        const tracked = await track({ rootUri: { fsPath: "/repo" }, inputBox: { value: "" } });
+        mockGit((_args, callback) =>
+          callback(new Error("fail"), "", "fatal: not a git repository")
+        );
+
+        await expect(tracked.resolveGitPath("COMMIT_MSG_DRAFT")).rejects.toThrow(
+          "fatal: not a git repository"
+        );
+      });
     });
   });
 

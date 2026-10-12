@@ -19,7 +19,9 @@ with Vitest.
 - `src/extension.ts` — activation: builds services and registers commands
 - `src/commands/` — command handlers; each is a factory that takes its dependencies
 - `src/core/` — business logic, no `vscode` imports. `ports.ts` defines the interfaces
-  (`IGitService`, `ISecretStore`, `IConfigService`, `IProviderFactory`) the rest depends on
+  (`IGitService`, `ISecretStore`, `IConfigService`, `IProviderFactory`, and the draft-file
+  ports `IRepositoryTracker`, `IDraftFiles`, `IDraftUi`, `IDraftConfig`) the rest depends on.
+  `commit-draft.ts` holds the draft-file feature (contract in the README)
 - `src/infrastructure/` — `vscode`-backed implementations of those ports
 - `src/providers/` — LLM provider clients, the provider registry, and the model catalog
   (`models.ts`)

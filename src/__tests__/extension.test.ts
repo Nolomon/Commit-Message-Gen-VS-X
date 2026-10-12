@@ -68,9 +68,26 @@ describe("activate", () => {
     expect(commandIds).toContain("commitMessageGen.setModel");
   });
 
-  it("pushes all registrations to subscriptions", () => {
+  it("pushes all registrations and the draft service to subscriptions", () => {
     activate(mockContext);
-    expect(mockContext.subscriptions).toHaveLength(4);
+    expect(mockContext.subscriptions).toHaveLength(5);
+  });
+
+  it("starts the draft file feature, which follows its setting from then on", () => {
+    activate(mockContext);
+    expect(vscode.workspace.onDidChangeConfiguration).toHaveBeenCalledTimes(1);
+  });
+
+  it("stops the draft file feature when its subscription is disposed", () => {
+    const subscription = { dispose: vi.fn() };
+    vi.mocked(vscode.workspace.onDidChangeConfiguration).mockReturnValueOnce(subscription);
+    activate(mockContext);
+
+    for (const registration of mockContext.subscriptions) {
+      registration.dispose();
+    }
+
+    expect(subscription.dispose).toHaveBeenCalledTimes(1);
   });
 });
 

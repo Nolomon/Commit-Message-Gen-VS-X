@@ -1,10 +1,10 @@
 import * as vscode from "vscode";
-import { IConfigService } from "../core/ports";
+import { Disposable, IConfigService, IDraftConfig } from "../core/ports";
 import { DEFAULT_MODEL_ID } from "../providers/models";
 
 const SECTION = "commitMessageGen";
 
-export class ConfigService implements IConfigService {
+export class ConfigService implements IConfigService, IDraftConfig {
   getModelId(): string {
     return vscode.workspace
       .getConfiguration(SECTION)
@@ -15,6 +15,20 @@ export class ConfigService implements IConfigService {
     return vscode.workspace
       .getConfiguration(SECTION)
       .get<boolean>("focusMessageBox", false);
+  }
+
+  isDraftFileEnabled(): boolean {
+    return vscode.workspace
+      .getConfiguration(SECTION)
+      .get<boolean>("draftFile.enabled", true);
+  }
+
+  onDidChangeDraftFileEnabled(listener: () => void): Disposable {
+    return vscode.workspace.onDidChangeConfiguration((event) => {
+      if (event.affectsConfiguration(`${SECTION}.draftFile.enabled`)) {
+        listener();
+      }
+    });
   }
 
   async setModelId(modelId: string): Promise<void> {
