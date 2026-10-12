@@ -65,6 +65,10 @@ Common commit types: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`
 
 If you work with a coding agent (Claude Code, Cursor, Codex, Copilot, and so on), it can put the commit message it writes straight into the Source Control message box. You review the staged diff next to it and click Commit yourself.
 
+<p align="center">
+  <img src="resources/agent-demo.gif" alt="A coding agent finishes a change and its commit message appears in the Source Control message box" />
+</p>
+
 ### Set It Up
 
 Paste this into your agent's instructions file (`CLAUDE.md`, `AGENTS.md`, Cursor rules, or wherever your agent keeps standing instructions). You do this once per project, or once globally:
